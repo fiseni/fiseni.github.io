@@ -1,8 +1,6 @@
 <head>
 	<meta charset="utf-8">
 	<title>{% if page.title %}{{page.title}} - {{site.title}}{% else %}{{site.title}}{% endif %}</title>
-
-  <!-- Edit site and author settings in `_config.yml` to make the social details your own -->
   {% if page.title %}
   {% else %}
     <meta content="website" property="og:type">
@@ -23,8 +21,14 @@
     {% endfor %}
   {% endif %}
 
+    <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@{{ site.site-twitter }}">
     <meta name="twitter:creator" content="@{{ site.social-twitter }}">
+  {% if page.title %}
+    <meta name="twitter:title" content="{{ page.title }}">
+  {% else %}
+    <meta name="twitter:title" content="{{ site.title }}">
+  {% endif %}
   {% if page.url %}
     <meta name="twitter:url" content="{{ site.url }}{{ page.url }}">
   {% endif %}

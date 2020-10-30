@@ -1,9 +1,9 @@
-title: Fati Iseni's Blog
+title: Fati Iseni - fiseni
 description: >
-  Fati Iseni's blog on technology and software development.
+  Fati Iseni 's blog on technology and software development.
 permalink: ':title/'
 baseurl:
-url: "fiseni.com"
+url: "https://fiseni.com"
 site-twitter:
 
 author: Fati Iseni
