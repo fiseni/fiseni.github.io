@@ -3,8 +3,8 @@ layout: post
 title: "Welcome to my new blog!"
 date: 2020-10-30 12:00:00 +0100
 description: My new blog based on GitHub Pages and Jekyll.
+# thumbnail-img: logo.png
 img: pozitron-cover.png
-thumbnail-img: logo.png
 fig-caption: #"Pozitron logo"
 tags: [Productivity, Blog]
 ---
