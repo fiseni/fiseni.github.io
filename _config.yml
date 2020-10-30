@@ -5,6 +5,7 @@ permalink: ':title/'
 baseurl:
 url: "https://fiseni.com"
 site-twitter:
+site-img: logo.png
 
 author: Fati Iseni
 author-img: fati-iseni.jpg
