@@ -1,7 +1,11 @@
 <head>
 	<meta charset="utf-8">
 	<title>{% if page.title %}{{page.title}} - {{site.title}}{% else %}{{site.title}}{% endif %}</title>
+  {% if page.img %}
+    <meta name="twitter:card" content="summary_large_image">
+  {% else %}
     <meta name="twitter:card" content="summary">
+  {% endif %}
     <meta name="twitter:site" content="@{{ site.site-twitter }}">
     <meta name="twitter:creator" content="@{{ site.social-twitter }}">
   {% if page.title %}
@@ -27,10 +31,10 @@
   {% else %}
     <meta property="og:type" content="website">
   {% endif %}
-  {% if page.thumbnail-img %}
-    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ page.thumbnail-img }}">
-  {% else if page.img %}
+  {% if page.img %}
     <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ page.img }}">
+  {% else if page.thumbnail-img %}
+    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ page.thumbnail-img }}">
   {% else %}
     <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ site.author-img }}">
   {% endif %}
