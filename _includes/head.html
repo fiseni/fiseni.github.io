@@ -27,7 +27,9 @@
   {% else %}
     <meta property="og:type" content="website">
   {% endif %}
-  {% if page.img %}
+  {% if page.thumbnail-img %}
+    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ page.thumbnail-img }}">
+  {% else if page.img %}
     <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ page.img }}">
   {% else %}
     <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ site.author-img }}">
