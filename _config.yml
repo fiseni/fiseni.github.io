@@ -1,0 +1,33 @@
+title: Fati Iseni's Blog
+description: >
+  Fati Iseni's blog on technology and software development.
+permalink: ':title/'
+baseurl:
+url: "fiseni.com"
+site-twitter:
+
+author: Fati Iseni
+author-img: fati-iseni.jpg
+about-author: Software Architect | Developer
+social-twitter: FatiIseni
+social-github: fiseni
+social-linkedin: fati-iseni-193928127
+social-email: fati.iseni@pozitrongroup.com
+
+# Disqus
+discus-identifier: fiseni
+
+# Tracker
+analytics: 251057969
+
+# Build Settings
+markdown: kramdown
+plugins:
+  - jekyll-sitemap
+  - jekyll-paginate
+  - jemoji
+
+paginate: 8
+paginate_path: "/page/:num"
+
+exclude: ["node_modules", "gulpfile.js", "package.json", "yarn.lock"]
