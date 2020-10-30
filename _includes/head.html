@@ -1,26 +1,6 @@
 <head>
 	<meta charset="utf-8">
 	<title>{% if page.title %}{{page.title}} - {{site.title}}{% else %}{{site.title}}{% endif %}</title>
-  {% if page.title %}
-  {% else %}
-    <meta content="website" property="og:type">
-  {% endif %}
-  {% if page.img %}
-    <meta content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ page.img }}" property="og:image">
-  {% else %}
-    <meta content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ site.author-img }}" property="og:image">
-  {% endif %}
-  {% if page.categories %}
-    {% for category in page.categories limit:1 %}
-    <meta content="{{ category }}" property="article:section">
-    {% endfor %}
-  {% endif %}
-  {% if page.tags %}
-    {% for tag in page.tags %}
-    <meta content="{{ tag }}" property="article:tag">
-    {% endfor %}
-  {% endif %}
-
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@{{ site.site-twitter }}">
     <meta name="twitter:creator" content="@{{ site.social-twitter }}">
@@ -41,6 +21,26 @@
     <meta name="twitter:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ site.site-img }}">
   {% else %}
     <meta name="twitter:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ site.author-img }}">
+  {% endif %}
+  
+    {% if page.title %}
+  {% else %}
+    <meta property="og:type" content="website">
+  {% endif %}
+  {% if page.img %}
+    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ page.img }}">
+  {% else %}
+    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/img/{{ site.author-img }}">
+  {% endif %}
+  {% if page.categories %}
+    {% for category in page.categories limit:1 %}
+    <meta property="article:section" content="{{ category }}">
+    {% endfor %}
+  {% endif %}
+  {% if page.tags %}
+    {% for tag in page.tags %}
+    <meta property="article:tag" content="{{ tag }}">
+    {% endfor %}
   {% endif %}
 
 	<meta name="description" content="{{ page.description }}">
