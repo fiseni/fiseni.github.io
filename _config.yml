@@ -106,6 +106,10 @@ kramdown:
 permalink: /posts/:title/
 
 defaults:
+  - scope:
+      path: ""
+    values:
+      image: /assets/images/pozitron-cover.png
   -
     scope:
       path: ""          # An empty string here means all files in the project
