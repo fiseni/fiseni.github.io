@@ -76,14 +76,17 @@ layout: page
 		  <!-- posted date -->
 		  <i class="far fa-clock fa-fw"></i>
 		  {% include timeago.html date=post.date tooltip=true %}
-
+		  <span>&nbsp;—&nbsp;</span>
 		  <!-- page views -->
 		  {% if site.google_analytics.pv.enabled %}
 		  <i class="far fa-eye fa-fw"></i>
 		  <span id="pv_{{-post.title-}}" class="pageviews">
 			<i class="fas fa-spinner fa-spin fa-fw"></i>
 		  </span>
+		  <span>&nbsp;—&nbsp;</span>
 		  {% endif %}
+
+		  <span class="post-words">{% capture words %}{{ post.content | number_of_words }}{% endcapture %}{% unless words contains "-" %}{{ words | plus: 250 | divided_by: 250 | append: " minute read" }}{% endunless %}</span>
 		</div>
   
 	</div>
