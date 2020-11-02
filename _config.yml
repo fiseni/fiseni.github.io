@@ -18,7 +18,9 @@ description: >-                                     # used by seo meta and the a
 # Replace with the website url, e.g. 'https://username.github.io'
 url: 'https://fiseni.com'
 
-author: Fati Iseni                                  # change to your full name
+author:
+  name: Fati Iseni
+  twitter: fiseni
 
 avatar: /assets/img/fati-iseni.jpg                  # support internet resources
 
