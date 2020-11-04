@@ -126,7 +126,7 @@ Everything is already configured (there is yaml file under .github folder), you 
 1. Push the content to master branch. Once the build is complete, new branch will be generated `gh-pages`
 2. Open the repository setting under GitHub, and change the publish source to `gh-pages`
 
-![GitHub Pages Settings](/assets/img/posts/02/ghpages-settings.PNG)
+![GitHub Pages Settings](/assets/img/posts/02/ghpages-settings.png)
 
 Now, your site will be up and running.
 
