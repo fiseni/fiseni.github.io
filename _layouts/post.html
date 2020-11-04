@@ -34,26 +34,6 @@ layout: default
           </span>
         </div>
 
-        <!-- lastmod -->
-        <!-- {%- capture filename -%}
-          {{ page.url | split: "/" | last }}
-        {%- endcapture -%}
-
-        {% for item in site.data.updates %}
-          {% assign encode_filename = item.filename | url_encode %}
-          {% if filename == encode_filename %}
-            {% assign lastmod = item.lastmod %}
-            {% break %}
-          {% endif %}
-        {% endfor %}
-
-        {% if lastmod %}
-        <div>
-          Updated
-          {% include timeago.html date=lastmod class="lastmod" tooltip=true %}
-        </div>
-        {% endif %} -->
-
         <!-- page views -->
         {% if site.google_analytics.pv.enabled %}
         <div>
