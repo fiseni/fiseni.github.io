@@ -35,7 +35,7 @@ layout: default
         </div>
 
         <!-- lastmod -->
-        {%- capture filename -%}
+        <!-- {%- capture filename -%}
           {{ page.url | split: "/" | last }}
         {%- endcapture -%}
 
@@ -52,7 +52,7 @@ layout: default
           Updated
           {% include timeago.html date=lastmod class="lastmod" tooltip=true %}
         </div>
-        {% endif %}
+        {% endif %} -->
 
         <!-- page views -->
         {% if site.google_analytics.pv.enabled %}
