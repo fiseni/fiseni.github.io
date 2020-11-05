@@ -100,7 +100,7 @@ I will try to simplify the installation steps here. If you need more information
     sudo apt update
     sudo apt install yq -y
     ```
-7. Now that the required tools are installed, go to the root directory of the project and run the init job. This will you do only once, it simply just cleans the repository and makes it ready for you.
+7. Now that the required tools are installed, go to the root directory of the project and run the init job. You need to do this only once, it cleans the repository and makes it ready for you.
 
     ```
     bash tools/init.sh
