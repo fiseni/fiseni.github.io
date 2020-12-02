@@ -13,7 +13,7 @@ pin: false
 ---
 I just recently published a Nuget package that offers some extensions to the .NET Core's built-in DI container, practically extensions to `IServiceCollection`. The extensions provide the ability for dynamic/runtime DI configuration, through external config files. You can find the repo [here](https://github.com/fiseni/PozitronDev.DIConfiguration).
 
-This is not a new approach at all, and in some other platform is being heavily used. If anyone used Java with Spring, at some point, you surely have utilized XML based injection. On the other hand in .NET this is actively discouraged, for a good reason. Giving up the compile-time error proofing not always is a bright idea. Of course, there is a difference in how "linking" and "reflection" works in Java and .NET, and that affects the design decisions. But, generally, strongly typed and compile-time configurations are always favored in .NET world.
+This is not a new approach at all, and in some other platforms is being heavily used. If anyone used Java with Spring, at some point, you surely have utilized XML based injection. On the other hand in .NET this is actively discouraged, for a good reason. Giving up the compile-time error proofing not always is a bright idea. Of course, there is a difference in how "linking" and "reflection" works in Java and .NET, and that affects the design decisions. But, generally, strongly typed and compile-time configurations are always favored in .NET world.
 
 Then, what all this is about? What's the benefit here, if any?
 
@@ -292,8 +292,8 @@ I do believe this is quite a clean solution. No longer instantiating and injecti
 
 ## Conclusion
 
-Having the option to switch the implementation easily and modify the behavior of the solution on the fly, is quite a handy and nice feature. The only caveat is that we gave up the commodity of the compile-checks. Although, it's not that the configuration issues/error will just sneak into our code. If there is a misconfiguration we'll get a runtime exception during the startup, so it's easy to spot and rectify the issues.
+Having the option to switch the implementations easily and modify the behavior of the solution on the fly, is quite a handy and nice feature. The only caveat is that we gave up the commodity of the compile-time checks. Although, it's not that the configuration issues/error will just sneak into our code. If there is a misconfiguration we'll get a runtime exception during the startup, so it's easy to spot and rectify the issues.
 
-Anyhow this love/hate game :) The important point is having a choice, and then you go and choose your own design and whatever fits you most!
+Anyhow this is a love/hate game :) The important point is having a choice, and then you go and choose your own design and whatever fits you most!
 
 Cheers!
