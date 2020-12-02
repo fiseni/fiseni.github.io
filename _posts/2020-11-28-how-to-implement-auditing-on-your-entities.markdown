@@ -4,7 +4,7 @@
 title: "How to implement auditing on your entities!"
 date: 2020-11-28 17:00:00 +0100
 description: A guide on how to implement auditing for your entities using Entity Framework.
-Updatecategories: [software-development]
+categories: [Software Development]
 tags: [EFCore, Auditing]
 image: /assets/img/pozitron-cover.png
 pin: false
@@ -18,7 +18,7 @@ Of course, we want this feature to be processed behind the scenes, automatically
 
 Let's create a base class that will hold the audit information. Once created, use it as a base class for all entities that you want to apply auditing.
 
-```
+```c#
 public class AuditableEntity
 {
     public DateTime? AuditCreatedTime { get; set; }
@@ -38,7 +38,7 @@ Other than that, on top of `UserID` I usually tend to persist the `Username` of 
 If you're using ASP.NET Core, you can access the authenticated user's information through `HttpContextAccessor`. But, you may want to keep your persistence infrastructure in a separate project, in which case you won't have direct access to this property.
 Let's create a simple class that will encapsulate the current user's information, and provide it wherever is required.
 
-```
+```c#
 public class CurrentUserProvider : ICurrentUserProvider
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
@@ -55,7 +55,7 @@ public class CurrentUserProvider : ICurrentUserProvider
 
 Also, you should register these services in your DI container as following
 
-```
+```c#
 services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
 ```
@@ -66,7 +66,7 @@ Now that we have the supporting infrastructure ready, let's make a few modificat
 
 First, modify the constructor and inject the `ICurrentUserProvider` implementation.
 
-```
+```c#
 private readonly ICurrentUserProvider currentUserProvider;
 
 public PozCargoContext(DbContextOptions<PozCargoContext> options,
@@ -79,7 +79,7 @@ public PozCargoContext(DbContextOptions<PozCargoContext> options,
 
 Then, override the `SaveChangesAsync` method and add the actual implementation for the auditing.
 
-```
+```c#
 public async override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
 {
     var addedEntries = ChangeTracker.Entries<AuditableEntity>().Where(x => x.IsAdded());
@@ -105,7 +105,7 @@ public async override Task<int> SaveChangesAsync(CancellationToken cancellationT
 
 You may notice, I'm using `IsAdded` and `IsModified` extensions, instead of directly utilizing the `EntityState` enum. This is important if your entities hold owned types (e.g. value objects). You want to consider the whole entity as modified if the owned types are added/modified.
 
-```
+```c#
 public static class ChangeTrackerExtensions
 {
     public static bool IsAdded(this EntityEntry entry) =>
