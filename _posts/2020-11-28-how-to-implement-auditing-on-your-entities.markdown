@@ -69,8 +69,8 @@ First, modify the constructor and inject the `ICurrentUserProvider` implementati
 ```c#
 private readonly ICurrentUserProvider currentUserProvider;
 
-public PozCargoContext(DbContextOptions<PozCargoContext> options,
-                        ICurrentUserProvider currentUserProvider)
+public MyDbContext(DbContextOptions<MyDbContext> options,
+                    ICurrentUserProvider currentUserProvider)
     : base(options)
 {
     this.currentUserProvider = currentUserProvider;

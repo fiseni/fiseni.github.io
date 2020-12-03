@@ -25,7 +25,7 @@ As a brief recap, the OCP predicates that we should have constructs that are ope
 
 The main logic and the driver here is that by modifying existing constructs, you're increasing the likelihood to introduce new bugs and issues to the existing features. If you find yourself refactoring the class and its methods over and over again, you'll likely end up with some inconsistencies. Also, you'll sneak in, and update/refactor your existing unit tests to reflect the new reality you created, which is not good practice at all. By striving to design an architecture, where you can add new requirements by just creating new constructs, you'll get a more robust and error-prone solution. That's all what OCP means. 
 
-Once that said, now let's imagine a scenario and try to offer various solutions to the problem in hand. Imagine you have an enterprise application (e.g. ERP solution), and you offering it to various clients. One of the requirements of the solution is to calculate some price for some particular workflow. As the number of your clients increases, they all want some minor, or major changes in how this calculation is done. The rest of the workflow remains the same, but the price calculation varies significantly depending on the customer.
+Once that said, now let's imagine a scenario and try to offer various solutions to the problem in hand. Imagine you have an enterprise application (e.g. ERP solution), and you offering it to various clients, deployed in their premises. One of the requirements of the solution is to calculate some price for some particular workflow. As the number of your clients increases, they all want some minor, or major changes in how this calculation is done. The rest of the workflow remains the same, but the price calculation varies significantly depending on the customer.
 
 ## Solution 1
 
@@ -155,7 +155,7 @@ public class Type1Calculator : IPriceCalculator
 {
     public string ClientType { get; } = "clientType1";
 
-     public decimal GetPrice(decimal someBaseValue)
+    public decimal GetPrice(decimal someBaseValue)
     {
         return Math.Round(someBaseValue * 10, 2);
     }
@@ -166,7 +166,7 @@ public class Type2Calculator : IPriceCalculator
     public string ClientType { get; } = "clientType2";
 
     public decimal GetPrice(decimal someBaseValue)
-        {
+    {
         return Math.Round(someBaseValue * 10 + 3, 0);
     }
 }
@@ -176,24 +176,21 @@ public class Type3Calculator : IPriceCalculator
     public string ClientType { get; } = "clientType3";
 
     public decimal GetPrice(decimal someBaseValue)
-        {
+    {
         return (someBaseValue - 2) * 5;
     }
 }
 
 public class MyService
 {
-    private readonly decimal someBaseValue;
     private readonly IEnumerable<IPriceCalculator> priceCalculators;
 
-    public MyService(decimal someBaseValue,
-                     IEnumerable<IPriceCalculator> priceCalculators)
+    public MyService(IEnumerable<IPriceCalculator> priceCalculators)
     {
-        this.someBaseValue = someBaseValue;
-            this.priceCalculators = priceCalculators;
+        this.priceCalculators = priceCalculators;
     }
 
-    public decimal GetCalculatedPrice(string clientType)
+    public decimal GetCalculatedPrice(decimal someBaseValue, string clientType)
     {
         var calculator = priceCalculators.FirstOrDefault(x => x.ClientType.Equals(clientType));
 
@@ -202,7 +199,7 @@ public class MyService
             throw new NotSupportedException();
         }
 
-        return calculator.GetPrice(this.someBaseValue);
+        return calculator.GetPrice(someBaseValue);
     }
 }
 ```
@@ -265,25 +262,22 @@ public interface IPriceCalculator
 
 And the actual implementation in our service
 
-```c#
+``` c#
 public class MyService
 {
-    private readonly decimal someBaseValue;
     private readonly IPriceCalculator priceCalculator;
 
-    public MyService(decimal someBaseValue,
-                     IPriceCalculator priceCalculator)
+    public MyService(IPriceCalculator priceCalculator)
     {
         if (priceCalculator == null)
             throw new ArgumentNullException(nameof(priceCalculator));
 
-        this.someBaseValue = someBaseValue;
         this.priceCalculators = priceCalculators;
     }
 
-    public decimal GetCalculatedPrice()
+    public decimal GetCalculatedPrice(decimal someBaseValue)
     {
-        return calculator.GetPrice(this.someBaseValue);
+        return calculator.GetPrice(someBaseValue);
     }
 }
 ```
@@ -292,7 +286,9 @@ I do believe this is quite a clean solution. No longer instantiating and injecti
 
 ## Conclusion
 
-Having the option to switch the implementations easily and modify the behavior of the solution on the fly, is quite a handy and nice feature. The only caveat is that we gave up the commodity of the compile-time checks. Although, it's not that the configuration issues/error will just sneak into our code. If there is a misconfiguration we'll get a runtime exception during the startup, so it's easy to spot and rectify the issues.
+Having the option to switch the implementations easily and modify the behavior of the solution on the fly, is quite a handy and nice feature. The only caveat is that we gave up the commodity of the compile-time checks. On the other hand, it's not that the configuration issues/errors will just sneak into our code. If there is a misconfiguration we'll get a runtime exception during the startup, so it's easy to spot and rectify the issues. Yet, it's not the same experience as fixing issues in a development environment, and that's something to consider.
+
+It's important to remember, not necessarily you have to move all DI configurations to an external config file. You still can do the binding for most of the services in your code. Then, for particular cases where you have multiple implementations, and you want more flexibility, you can take only those definitions out. 
 
 Anyhow this is a love/hate game :) The important point is having a choice, and then you go and choose your own design and whatever fits you most!
 
