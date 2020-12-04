@@ -1,9 +1,9 @@
 ---
 # layout: post
 # author: Fati Iseni
-title: "Open-Close Principle and runtime DI configurations!"
+title: "Open-Closed Principle and runtime DI configurations!"
 date: 2020-12-02 17:00:00 +0100
-description: How to improve your design and adhere to Open-Close Principle by using dynamic/runtime DI configuration.
+description: How to improve your design and adhere to Open-Closed Principle by using dynamic/runtime DI configuration.
 categories: [Software Development]
 tags: [dependency injection, dotnetcore, design patterns, software architecture]
 image: /assets/img/pozitron-cover.png
@@ -19,9 +19,9 @@ Then, what all this is about? What's the benefit here, if any?
 
 ## Motivation
 
-Shortly said, such a design offers the ability to switch implementations on the fly, on runtime, not requiring to re-compile the solution; restarting the application is all you need. But, do we really need that? We already have other mechanisms and patterns on how to provide some form of flexibility in this context. Before going any further, let's just shortly remind ourselves of Open-Close Principle, and what that means.
+Shortly said, such a design offers the ability to switch implementations on the fly, on runtime, not requiring to re-compile the solution; restarting the application is all you need. But, do we really need that? We already have other mechanisms and patterns on how to provide some form of flexibility in this context. Before going any further, let's just shortly remind ourselves of Open-Closed Principle, and what that means.
 
-As a brief recap, the OCP predicates that we should have constructs that are open to extensions and close to changes. This means if we need to add a "behavior" to a solution, or even to a class; we should be able to do that without changing the existing constructs. Even more simplified, if you have switch statements and too many conditional logic; it might be a sign that the behavior is too much hardcoded, and might be refactored in a better way.
+As a brief recap, the OCP predicates that we should have constructs that are open to extensions and closed to changes. This means if we need to add a "behavior" to a solution, or even to a class; we should be able to do that without changing the existing constructs. Even more simplified, if you have switch statements and too many conditional logic; it might be a sign that the behavior is too much hardcoded, and might be refactored in a better way.
 
 The main logic and the driver here is that by modifying existing constructs, you're increasing the likelihood to introduce new bugs and issues to the existing features. If you find yourself refactoring the class and its methods over and over again, you'll likely end up with some inconsistencies. Also, you'll sneak in, and update/refactor your existing unit tests to reflect the new reality you created, which is not good practice at all. By striving to design an architecture, where you can add new requirements by just creating new constructs, you'll get a more robust and error-prone solution. That's all what OCP means. 
 
