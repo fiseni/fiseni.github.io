@@ -1,7 +1,7 @@
 ---
 # layout: post
 # author: Fati Iseni
-title: "Alternative cashing implementations and cache invalidation!"
+title: "Alternative caching implementations and cache invalidation!"
 date: 2020-12-09 17:00:00 +0100
 description: Alternative implementation for caching, and on-demand cache invalidation using EF (on changes only).
 categories: [Software Development]
