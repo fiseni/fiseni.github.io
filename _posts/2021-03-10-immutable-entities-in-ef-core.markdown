@@ -1,7 +1,7 @@
 ---
 # layout: post
 # author: Fati Iseni
-title: "Immutable entities and value object in EF Core!"
+title: "Immutable entities and value objects in EF Core!"
 date: 2021-03-10 17:00:00 +0100
 description: How to implement and persist immutable entities and value object in Entity Framework Core.
 categories: [Software Development]
@@ -53,7 +53,7 @@ The next step would be to go through all the properties and try to make sense of
 - `Id` - This is an identifier of the entity/record. In our case, it's not a business concept but just required technical information. Once the entity is assigned an identifier, there is no reason for the `Id` to change.
 - `OrderNo` - This represents the number of the document/order. This should be a unique identifier, composed of some given business rules. Once the document gets its number, no longer we should be able to change it.
 - `Date` - It is the date of the document. In this example, we'll require the exact date and time to be set automatically by the system itself, not as an input by the user. Additionally, instead of directly setting the date, we'll accept a given service that can provide the required information. This will enable us to mock the service and write better unit tests.
-- `Customer` information - We'd like to group all customer information in a separate construct, and we'll use a value object for that purpose. The customer information should be provided while we create the order. No changes should be allowed, otherwise, that would represent a completely different order.]
+- `Customer` information - We'd like to group all customer information in a separate construct, and we'll use a value object for that purpose. The customer information should be provided while we create the order. No changes should be allowed, otherwise, that would represent a completely different order.
 - `Address` information - We might group the address information in a separate value object too. It is required information to create an order, but the customer can change their mind and update the desired shipping address.
 - `GrandTotal` - It's the sum of the prices of the items in the order. The amount should be automatically updated as we add or delete items from the order.
 - `OrderItems` - It's a list of items in the current order. In this example, once we add an item, we can no longer change it, but only delete it. We also want to encapsulate the actions of adding/deleting items within the `Order` entity.
