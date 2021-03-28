@@ -1,0 +1,97 @@
+---
+# layout: post
+# author: Fati Iseni
+title: "How to remove a Microsoft work/school account?"
+date: 2021-03-11 17:00:00 +0100
+description: How to disassociate your personal Microsoft account from a work/school (Azure AD) account!
+categories: [Blogging, Tutorial]
+tags: [microsoft account, azure, office365, outlook]
+image: /assets/img/pozitron-cover.png
+pin: false
+# math: true
+# toc: true
+---
+I had a strange experience with my Microsoft account a couple of days ago. My personal Microsoft account got entangled with the newly created Azure AD (work/school) account, and I no longer could use some services (e.g. Outlook). Let me provide some background here and elaborate on it in more detail. I have purchased my domains on GoDaddy years ago, including the premium hosting package. I was managing the mail server by myself, the routing between the domain names (I had two), and all the rest of the details. Some time ago I got sick of all the management tasks, and I purchased a subscription to Office 365 Home provided by Microsoft. As part of the premium options, they offer the ability to associate a custom domain name to your "subscription", so all the members sharing the package can get an alias mail with the custom domain name. So, let's summarize, using example person "John Smith" and "smith.com" domain
+- I own the `smith.com` domain
+- I own Office 365 Home subscription
+- I associated my Office 365 account with the `smith.com` domain
+- On top of my personal account `john@outlook.com`, now I got alias mail `john@smith.com`
+- I have defined `john@smith.com` as my primary mail/alias. All my devices and services use this Microsoft account, including Windows 10.
+- I use this account for different cloud services provided by Microsoft, including "DevOps", azure services, etc.
+
+This works great and I've been quite happy with this setup. But, there are few caveats that you have to consider. Just recently, one of my clients shared few "DevOps" projects with me, which were hosted on azure (dev.azure.com). Since they have been using the Azure AD infrastructure (they might have added the user explicitly or shared directly with `john@smith.com`), once I accepted the invitation the "entanglement" began. In this scenario, Microsoft just ignores that the domain `smith.com` is associated with a personal Microsoft account, and automatically creates an AD organization `smith.com`. Once the directory is created for the base domain, they additionally added the `john@smith.com` user to the client's organization/directory as a member (hence completed the sharing part). Now, as you can assume, the `smith.com` domain exists as an AD organization; and also as a custom domain, part of a personal Microsoft subscription. This setup led to the following oddities
+- Whenever I log in on online Microsoft services (outlook, azure, etc) with `john@smith.com`, I'm always presented with a choice (a selection) whether I want to login with my personal account or work/school account. I didn't sign for this, but OK, I can live with it.
+- Some other services, the Outlook (desktop app) in particular, no longer were able to connect to the server. In these cases, the AD account has precedence, and since no services or subscriptions are defined for that account, the applications couldn't connect. Simply, my mail server is not managed there. Initially, I thought perhaps some local misconfiguration happened, so I tried the following:
+    - Removed my account from the Outlook app, and tried to re-add it (which of course I couldn't)
+    - Re-created my mail profile.
+    - Tried all kinds of related flags in the registry, autodiscovery options, disabled WAM, etc.
+    - Reinstalled the Office suite.
+
+None of this worked. To be sure, I tried to connect through a totally different PC, and still, the Outlook client couldn't add the account (not even as an IMAP account). This assured me that no local configuration matters here. The decision for the authentication/authorization authority is done remotely, and in this case, the AD account always will have a priority.
+
+I succeeded to fix the issue. So, here are the steps you have to follow to mitigate this situation.
+1. Leave any organization that your newly created Azure AD account is a member, as part of any "sharing" process.
+2. Claim ownership of your domain name and get admin privileges.
+3. Create a new admin user for your AD organization.
+4. Delete your user `john@smith.com` and your domain `smith.com` from AD.
+5. Delete the user permanently.
+
+## Leaving all third-party organizations
+
+The first step will be to remove any association of your account with third-party organizations.
+
+- Log in to `portal.azure.com` or `login.microsoft.com` with your AD account. Simply once you enter your username `john@smith.com` choose the school/work option.
+- Click on the user icon, and choose "View account".
+- On the navigation menu on the left, select the "Organizations" menu.
+- Here you'll find a list of all organizations that are associated with your user.
+- Click on "Leave organization" for any third-party organizations that are listed here. You won't be able to leave your home organization `smith.com`, and that's OK for now.
+- Communicate the owners of those third-party organizations, and kindly ask them to remove any sharing or any other setup related to `john@smith.com` account. We want to play safe, and be sure there are not any relations left.
+
+This will complete this initial step, and once done, you are ready to proceed with the rest of the actions.
+
+## Claiming admin privileges for your domain
+
+Even though Microsoft automatically created the `smith.com` AD organization, your user `john@smith.com` has no privileges in this directory. They can't be sure if you really own this domain name, and to claim the ownership, you'll have to go through few verification steps.
+- Log in to `portal.azure.com` or `login.microsoft.com` with your AD account. Simply once you enter your username `john@smith.com` choose the school/work option.
+- Click on the user icon, and choose "View account".
+- Click on the options icon on the top left corner of the navigation menu, and choose "Admin".
+- Since your account is still not the admin of the directory, a new page for claiming ownership will be presented. It should state something like "Ready to become the Admin for `school.com`?".
+- The wizard consists of just a couple of steps. and the provided descriptions are quite explanatory.
+- All you will have to do, is add a TXT record in your DNS configuration with a value that is provided in this step. If you're an owner of the domain name, this is quite a straightforward task. Most often your DNS management will be part of your hosting platform, so your hosting provider will have some tool/page for managing the DNS records. If you're managing the DNS separately (e.g. Cloudflare), then you will complete the configuration there.
+- Once you have added the TXT record (wait 5-10 minutes), finish the steps in the wizard. If verification succeeds, your user `john@smith.com` will gain admin privileges.
+
+## Create a new Admin account.
+
+Now, that you are an admin of the organization, the "Admin" page will contain a lot more options.
+
+- Open the "Admin" center. If you have closed your browser, just follow the previous steps. Log in, click "View Account", and choose "Admin" from the navigations.
+- Click on the "Users" menu, and then on "Active Users". The only user listed will be `john@smith.com`.
+- Click on "Add User". Populate the basic information for the user, "First Name", "Last Name", "Display Name". For the username choose anything you like, it might be simply "admin". <strong>Now, the most important part, on the "Domains" dropdown section, one additional option will be available `smith.onmicrosoft.com`. It's crucial that you select this option, so we can free up our domain name.</strong> Uncheck the "Automatically create a password" and enter a password for this account. Uncheck the "Require this user to change their password when they first sign-in" to simplify the process. Click "Next".
+- On the second step "Product Licenses", just choose your location, and be sure that the "Right Management Adhoc" license is selected. Since you haven't used this account for anything this would be the only license listed here. Click "Next".
+- On the "Optional Settings" page, it's important to assign admin privileges to this user. Expand the "Roles" section, select "Admin Center Access", and check the "Global Administrator" role. Click "Next".
+- Finish adding the user.
+- Logout from `john@smith.com`.
+
+## Deleting your user and your domain from AD
+
+Now that we have an additional admin user (which is defined on the `smith.onmicrosoft.com` domain), we can delete our user and our domain from the organization.
+
+1. Log in to the same page, this time with `admin@smith.onmicrosoft.com` user.
+2. Get to the "Users" page, select your user `john@smith.com`, and choose "Delete a user".
+3. On the navigation menu, select the "Show All" option. On the expanded menu, choose "Setup" and then "Domains".
+4. On this page two domains will be listed `smith.com` and `smith.onmicrosoft.com`. Select the `smith.com` domain and delete it.
+5. Logout from everywhere.
+
+## Deleting your user permanently
+
+When you delete a user, Microsoft keeps the record for additional 30 days, just in case you change your mind and want to recover it. In our case, we'd like to delete it permanently.
+
+1. Log in to `portal.azure.com` with `admin@smith.onmicrosoft.com`
+2. This time instead of choosing "View account", choose "Azure Active Directory". Most probably it will be listed on the front page under the "Azure services" section. You can find it on the left navigation menu as well.
+3. Choose the "Users" menu.
+4. Choose the "Deleted users" menu.
+5. Select your deleted user `john@smith.com` and delete it permanently.
+
+At this stage, you have completed all required actions. You should be a little patient and give it some time (a couple of days). In my case, after 1 day I was able to successfully add my mail account through the Outlook client. I hope this article will save you some time, and it will be of help if you find yourself in the same situation.
+
+<strong>NOTE:</strong> I avoided adding screenshots in this article since the UI is changing often and might mislead you. I tried to be quite descriptive in the provided steps, and hopefully, they are easy to follow. Cheers!
