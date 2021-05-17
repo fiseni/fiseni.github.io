@@ -178,6 +178,8 @@ public class Address : ValueObject
     public string Street { get; private set; }
     public string City { get; private set; }
 
+    public static Address Empty => new Address();
+
     private Address() { }
 
     public Address(string street, string city)
@@ -230,7 +232,7 @@ public class Customer
     public IEnumerable<CustomerAddress> Addresses => _addresses.AsEnumerable();
 
     // This is owned type, not a navigation.
-    public Address DefaultAddress { get; private set; }
+    public Address DefaultAddress { get; private set; } = Address.Empty;
 
     public void AddAddress(Address address, bool isDefault = false)
     {
@@ -264,6 +266,11 @@ public class Customer
 
         _addresses.Remove(customerAddress);
 
+        if (DefaultAddress.Equals(customerAddress.Details))
+        {
+            DefaultAddress = Address.Empty;
+        }
+
         // Depending on the requirements, if the default address is deleted, the first next one can be assigned as default.
     }
 
@@ -271,7 +278,7 @@ public class Customer
     {
         _ = address ?? throw new ArgumentNullException(nameof(address));
 
-        if (DefaultAddress is null || !DefaultAddress.Equals(address))
+        if (!DefaultAddress.Equals(address))
         {
             DefaultAddress = address;
         }
