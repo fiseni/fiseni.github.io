@@ -1,0 +1,599 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><meta name="theme" content="Chirpy v2.5.1"><meta name="generator" content="Jekyll v4.2.0" /><meta property="og:title" content="Alternative caching implementations and cache invalidation!" /><meta name="author" content="Fati Iseni" /><meta property="og:locale" content="en_US" /><meta name="description" content="Alternative implementation for caching, and on-demand cache invalidation using EF (on changes only)." /><meta property="og:description" content="Alternative implementation for caching, and on-demand cache invalidation using EF (on changes only)." /><link rel="canonical" href="https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/" /><meta property="og:url" content="https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/" /><meta property="og:site_name" content="Fati Iseni - Blog" /><meta property="og:image" content="https://fiseni.com/assets/img/pozitron-cover.png" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2020-12-09T17:00:00+01:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://fiseni.com/assets/img/pozitron-cover.png" /><meta property="twitter:title" content="Alternative caching implementations and cache invalidation!" /><meta name="twitter:site" content="@fiseni" /><meta name="twitter:creator" content="@fiseni" /><meta name="google-site-verification" content="p9Rvv10SRN6FJ9f7Vbg7Pnrts_Y9_nDh4zVdFcfx7Ls" /> <script type="application/ld+json"> {"headline":"Alternative caching implementations and cache invalidation!","dateModified":"2020-12-09T17:00:00+01:00","description":"Alternative implementation for caching, and on-demand cache invalidation using EF (on changes only).","datePublished":"2020-12-09T17:00:00+01:00","@type":"BlogPosting","image":"https://fiseni.com/assets/img/pozitron-cover.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/"},"url":"https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/","author":{"@type":"Person","name":"Fati Iseni"},"@context":"https://schema.org"}</script><title>Alternative caching implementations and cache invalidation! | Fati Iseni - Blog</title><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" as="style" href="/assets/css/post.css"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script async src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4/dist/js/bootstrap.min.js"></script> <script async src="/assets/js/post.min.js"></script> <script defer src="/app.js"></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/fati-iseni.jpg" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">Fati Iseni</a></div><div class="site-subtitle font-italic">Software Architect</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-sun" dark-mode-invisible></i> <i class="mode-toggle fas fa-moon" light-mode-invisible></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.mode != null) { if (this.mode == ModeToggle.DARK_MODE) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.mode != null) { if (self.mode == ModeToggle.DARK_MODE) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/fiseni" aria-label="github" target="_blank" rel="noopener"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/fiseni" aria-label="twitter" target="_blank" rel="noopener"> <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/fati-iseni-193928127" aria-label="linkedin" target="_blank" rel="noopener"> <i class="fab fa-linkedin"></i> </a> <a href="/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Alternative caching implementations and cache invalidation!</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-9"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"> <img src="/assets/img/pozitron-cover.png" data-src="/assets/img/pozitron-cover.png" class="post-cover-img"><h1 data-toc-skip>Alternative caching implementations and cache invalidation!</h1><div class="post-meta text-muted d-flex flex-column justify-content-center"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Wed, Dec 9, 2020, 5:00 PM +0100" > Dec 9, 2020 <i class="unloaded">2020-12-09T17:00:00+01:00</i> </span> by <span class="author"> Fati Iseni </span></div></div><div class="post-content"><p>Today I’ll be talking about caching and various ways to implement the same. We’ll also show how to invalidate the cache on demand if using Entity Framework.</p><p>The caching feature is almost mandatory for your applications, especially if you have a lot of relatively read-only data. It can drastically boost up the performance, by reducing the roundtrips to your database or any other persistence infrastructure that you might have.</p><p>The standard and most common way of implementing caching is by using a decorator pattern (or is it proxy pattern? Everlasting discussion) and invalidating the cache on specific time intervals.</p><p>OK, let’s imagine a scenario, and try to provide various possible solutions. We have <code class="language-plaintext highlighter-rouge">Customer</code> data in our application, and we utilize this information very often. In the case of a desktop application, we might have a sort of drop-down or search controls; and in a web application might be a search field with a drop-down suggestion list. Other than that, the application uses customers heavily in various scenarios. The behavior of several features depends on the customer, and we querying this information quite often.</p><p>To sum up the requirements:</p><ul><li><p>We have customers entity/table in our app.</p><li><p>The customer table contains roughly 1.000 records.</p><li><p>The records barely change, once per day, or even once per week.</p><li><p>But, once the data is changed, it’s crucial we have the new data and work with the most up-to-date information.</p><li><p>We require a complete list of customers, for whatever reason.</p></ul><p>Based on all information above, we surely want to utilize some caching infrastructure and reduce the number of queries to persistence.</p><h2 id="solution-1">Solution 1</h2><p>The common approach, as mentioned above, is to use the decorator pattern. Initially, we have a service/repository (or whatever construct) which queries the persistence and gets the data. Then, we create an additional implementation that contains the same actions but wraps/decorates each of them with caching functionality. The rest of the application consumes the cached variant of the service.</p><p>The customer entity</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Address</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Email</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">interface</span> <span class="nc">ICustomerRepository</span>
+<span class="p">{</span>
+    <span class="n">Task</span><span class="p">&lt;</span><span class="n">List</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;&gt;</span> <span class="nf">GetCustomers</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">CustomerRepository</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">AppDbContext</span> <span class="n">dbContext</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">CustomerRepository</span><span class="p">(</span><span class="n">AppDbContext</span> <span class="n">dbContext</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">dbContext</span> <span class="p">=</span> <span class="n">dbContext</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">List</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;&gt;</span> <span class="nf">GetCustomers</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">dbContext</span><span class="p">.</span><span class="n">Customers</span><span class="p">.</span><span class="nf">ToListAsync</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">CustomerCachedRepository</span> <span class="p">:</span> <span class="n">ICustomerRepository</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">IMemoryCache</span> <span class="n">cache</span><span class="p">;</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">CustomerRepository</span> <span class="n">customerRepository</span><span class="p">;</span>
+
+    <span class="k">private</span> <span class="k">readonly</span> <span class="kt">string</span> <span class="n">cacheKey</span> <span class="p">=</span> <span class="k">nameof</span><span class="p">(</span><span class="n">Customer</span><span class="p">);</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">TimeSpan</span> <span class="n">cacheDuration</span> <span class="p">=</span> <span class="n">TimeSpan</span><span class="p">.</span><span class="nf">FromSeconds</span><span class="p">(</span><span class="m">1</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="nf">CustomerCachedRepository</span><span class="p">(</span><span class="n">IMemoryCache</span> <span class="n">cache</span><span class="p">,</span>
+                                    <span class="n">CustomerRepository</span> <span class="n">customerRepository</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">cache</span> <span class="p">=</span> <span class="n">cache</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">customerRepository</span> <span class="p">=</span> <span class="n">customerRepository</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">Task</span><span class="p">&lt;</span><span class="n">List</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;&gt;</span> <span class="nf">GetCustomers</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">cache</span><span class="p">.</span><span class="nf">GetOrCreateAsync</span><span class="p">(</span><span class="n">cacheKey</span><span class="p">,</span> <span class="n">entry</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="n">entry</span><span class="p">.</span><span class="n">SlidingExpiration</span> <span class="p">=</span> <span class="n">cacheDuration</span><span class="p">;</span>
+            <span class="k">return</span> <span class="n">customerRepository</span><span class="p">.</span><span class="nf">GetCustomers</span><span class="p">();</span>
+        <span class="p">});</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>We’ll register the services as scoped, as shown below. Note that the cached repository accepts concrete implementation and not the interface, otherwise we’ll end up with a circular dependency.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="n">services</span><span class="p">.</span><span class="nf">AddMemoryCache</span><span class="p">();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">ICustomerRepository</span><span class="p">,</span> <span class="n">CustomerCachedRepository</span><span class="p">&gt;();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">CustomerRepository</span><span class="p">&gt;();</span>
+</pre></table></code></div></div><h2 id="solution-2">Solution 2</h2><p>The previous solution is quite straightforward and does the job well. The only issue with this approach is the “timer”. We are invalidating the cache on strictly defined time intervals. Choosing the right time interval is not as easy as it seems. Define a short interval (a couple of seconds) and you end with too many queries, define a longer one and you risk working with obsolete data.</p><p>In our scenario, customers barely change, and yet we end up querying them each second. So, we should define the interval in hours maybe? In that case, when changes occur, we surely will end up corrupting our data.</p><p>So, let’s try another approach, implement caching manually and invalidate the cache on-demand, on change only. We’ll create a new specific interface and name it <code class="language-plaintext highlighter-rouge">ICachedDataService</code>. We’ll modify the <code class="language-plaintext highlighter-rouge">CustomerRepository</code> as following</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">interface</span> <span class="nc">ICachedDataService</span>
+<span class="p">{</span>
+    <span class="n">Task</span> <span class="nf">Reload</span><span class="p">(</span><span class="n">AppDbContext</span> <span class="n">dbContext</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">interface</span> <span class="nc">ICustomerRepository</span>
+<span class="p">{</span>
+    <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;</span> <span class="n">Customers</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">CustomerRepository</span> <span class="p">:</span> <span class="n">ICustomerRepository</span><span class="p">,</span> <span class="n">ICachedDataService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">static</span> <span class="k">readonly</span> <span class="kt">object</span> <span class="n">_instanceLock</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">object</span><span class="p">();</span>
+
+    <span class="k">public</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;</span> <span class="n">Customers</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Reload</span><span class="p">(</span><span class="n">AppDbContext</span> <span class="n">dbContext</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">customers</span> <span class="p">=</span> <span class="k">await</span> <span class="n">dbContext</span><span class="p">.</span><span class="n">Customers</span><span class="p">.</span><span class="nf">ToListAsync</span><span class="p">();</span>
+        <span class="k">lock</span> <span class="p">(</span><span class="n">_instanceLock</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">Customers</span> <span class="p">=</span> <span class="n">customers</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>No doubt this construct should have a singleton scope. We want a single instance so the list of customers will act as static information. Surely, you can have a static class here, or implement a singleton pattern manually. But, be aware in that case the consumers will be strongly coupled to the implementation, and you might no be able to easily switch it and unit test the consumers properly. My advice, if you already using a DI container, just let it handle the scope for you, and utilize constructor injection in the consumers.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICustomerRepository</span><span class="p">,</span> <span class="n">CustomerRepository</span><span class="p">&gt;();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">,</span> <span class="n">CustomerRepository</span><span class="p">&gt;();</span>
+</pre></table></code></div></div><p>And, finally, let’s invalidate the cache in the persistence implementation, in our case EntityFramework. Override the SaveChanges as shown below</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">AppDbContext</span> <span class="p">:</span> <span class="n">DbContext</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">ICachedDataService</span> <span class="n">cachedDataService</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="n">DbSet</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;</span> <span class="n">Customers</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">AppDbContext</span><span class="p">(</span><span class="n">DbContextOptions</span><span class="p">&lt;</span><span class="n">AppDbContext</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">,</span>
+                        <span class="n">ICachedDataService</span> <span class="n">cachedDataService</span><span class="p">)</span>
+        <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">cachedDataService</span> <span class="p">=</span> <span class="n">cachedDataService</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">protected</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">OnModelCreating</span><span class="p">(</span><span class="n">ModelBuilder</span> <span class="n">modelBuilder</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">base</span><span class="p">.</span><span class="nf">OnModelCreating</span><span class="p">(</span><span class="n">modelBuilder</span><span class="p">);</span>
+
+        <span class="n">modelBuilder</span><span class="p">.</span><span class="nf">ApplyConfiguration</span><span class="p">(</span><span class="k">new</span> <span class="nf">CustomerConfiguration</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">override</span> <span class="k">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">SaveChangesAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">cancellationToken</span> <span class="p">=</span> <span class="k">default</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">isCustomerChanged</span> <span class="p">=</span> <span class="n">ChangeTracker</span><span class="p">.</span><span class="n">Entries</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;().</span><span class="nf">Where</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="nf">IsAddedOrModifiedOrDeleted</span><span class="p">()).</span><span class="nf">Count</span><span class="p">()</span> <span class="p">&gt;</span> <span class="m">0</span><span class="p">;</span>
+
+        <span class="kt">var</span> <span class="n">response</span> <span class="p">=</span> <span class="k">await</span> <span class="k">base</span><span class="p">.</span><span class="nf">SaveChangesAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">isCustomerChanged</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">await</span> <span class="n">cachedDataProvider</span><span class="p">.</span><span class="nf">Reload</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>Note the extension method. If entities have owned types, you may want to check them for changes as well. There are some improvements in the newer versions, but previously, EF was not flagging the entity as modified if any of the owned types have changed.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">static</span> <span class="k">class</span> <span class="nc">ChangeTrackerExtensions</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="kt">bool</span> <span class="nf">IsAddedOrModifiedOrDeleted</span><span class="p">(</span><span class="k">this</span> <span class="n">EntityEntry</span> <span class="n">entry</span><span class="p">)</span> <span class="p">=&gt;</span>
+        <span class="n">entry</span><span class="p">.</span><span class="n">State</span> <span class="p">==</span> <span class="n">EntityState</span><span class="p">.</span><span class="n">Deleted</span> <span class="p">||</span>
+        <span class="n">entry</span><span class="p">.</span><span class="n">State</span> <span class="p">==</span> <span class="n">EntityState</span><span class="p">.</span><span class="n">Added</span> <span class="p">||</span>
+        <span class="n">entry</span><span class="p">.</span><span class="n">State</span> <span class="p">==</span> <span class="n">EntityState</span><span class="p">.</span><span class="n">Modified</span> <span class="p">||</span>
+        <span class="n">entry</span><span class="p">.</span><span class="n">References</span><span class="p">.</span><span class="nf">Any</span><span class="p">(</span><span class="n">r</span> <span class="p">=&gt;</span> <span class="n">r</span><span class="p">.</span><span class="n">TargetEntry</span> <span class="p">!=</span> <span class="k">null</span> <span class="p">&amp;&amp;</span>
+                                    <span class="n">r</span><span class="p">.</span><span class="n">TargetEntry</span><span class="p">.</span><span class="n">Metadata</span><span class="p">.</span><span class="nf">IsOwned</span><span class="p">()</span> <span class="p">&amp;&amp;</span>
+                                    <span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">TargetEntry</span><span class="p">.</span><span class="n">State</span> <span class="p">==</span> <span class="n">EntityState</span><span class="p">.</span><span class="n">Added</span> <span class="p">||</span> <span class="n">r</span><span class="p">.</span><span class="n">TargetEntry</span><span class="p">.</span><span class="n">State</span> <span class="p">==</span> <span class="n">EntityState</span><span class="p">.</span><span class="n">Modified</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>Now, whenever the customer information is changed, we’ll reload the cached data immediately, and the consumers will work with up-to-date customers.</p><p>Initially, we’ll read/reload the data on application startup. You can do it as shown here.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">host</span> <span class="p">=</span> <span class="nf">CreateHostBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">).</span><span class="nf">Build</span><span class="p">();</span>
+
+        <span class="k">using</span> <span class="p">(</span><span class="kt">var</span> <span class="n">scope</span> <span class="p">=</span> <span class="n">host</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="nf">CreateScope</span><span class="p">())</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">services</span> <span class="p">=</span> <span class="n">scope</span><span class="p">.</span><span class="n">ServiceProvider</span><span class="p">;</span>
+            <span class="kt">var</span> <span class="n">dbContext</span> <span class="p">=</span> <span class="n">services</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">AppDbContext</span><span class="p">&gt;();</span>
+            <span class="kt">var</span> <span class="n">cachedDataService</span> <span class="p">=</span> <span class="n">services</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">&gt;();</span>
+
+            <span class="k">await</span> <span class="n">cachedDataService</span><span class="p">.</span><span class="nf">Reload</span><span class="p">(</span><span class="n">dbContext</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">host</span><span class="p">.</span><span class="nf">Run</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="n">IHostBuilder</span> <span class="nf">CreateHostBuilder</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">=&gt;</span>
+        <span class="n">Host</span><span class="p">.</span><span class="nf">CreateDefaultBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="p">.</span><span class="nf">ConfigureWebHostDefaults</span><span class="p">(</span><span class="n">webBuilder</span> <span class="p">=&gt;</span>
+            <span class="p">{</span>
+                <span class="n">webBuilder</span><span class="p">.</span><span class="n">UseStartup</span><span class="p">&lt;</span><span class="n">Startup</span><span class="p">&gt;();</span>
+            <span class="p">});</span>
+<span class="p">}</span>
+</pre></table></code></div></div><h2 id="solution-3">Solution 3</h2><p>What if we want several entities cached? Let’s say we want to cache a list of countries too.</p><p>We’ll start by creating a few additional abstractions and refactor the implementations. Let’s define an interface which will mark the entities that we want to cache.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">interface</span> <span class="nc">ICacheInfo</span>
+<span class="p">{</span>
+    <span class="kt">string</span> <span class="n">CacheKey</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span> <span class="p">:</span> <span class="n">ICacheInfo</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CacheKey</span> <span class="p">=&gt;</span> <span class="k">nameof</span><span class="p">(</span><span class="n">Customer</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Address</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Email</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Country</span> <span class="p">:</span> <span class="n">ICacheInfo</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CacheKey</span> <span class="p">=&gt;</span> <span class="k">nameof</span><span class="p">(</span><span class="n">Country</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Code</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>And few changes in the repository implementations</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+</pre><td class="rouge-code"><pre>
+<span class="k">public</span> <span class="k">interface</span> <span class="nc">ICachedDataService</span> <span class="p">:</span> <span class="n">ICacheInfo</span>
+<span class="p">{</span>
+    <span class="n">Task</span> <span class="nf">Reload</span><span class="p">(</span><span class="n">AppDbContext</span> <span class="n">dbContext</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">interface</span> <span class="nc">ICustomerRepository</span>
+<span class="p">{</span>
+    <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;</span> <span class="n">Customers</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">interface</span> <span class="nc">ICountryRepository</span>
+<span class="p">{</span>
+    <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Country</span><span class="p">&gt;</span> <span class="n">Countries</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">CustomerRepository</span> <span class="p">:</span> <span class="n">ICustomerRepository</span><span class="p">,</span> <span class="n">ICachedDataService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">static</span> <span class="k">readonly</span> <span class="kt">object</span> <span class="n">_instanceLock</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">object</span><span class="p">();</span>
+
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CacheKey</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="k">nameof</span><span class="p">(</span><span class="n">Customer</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;</span> <span class="n">Customers</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Reload</span><span class="p">(</span><span class="n">AppDbContext</span> <span class="n">dbContext</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">customers</span> <span class="p">=</span> <span class="k">await</span> <span class="n">dbContext</span><span class="p">.</span><span class="n">Customers</span><span class="p">.</span><span class="nf">ToListAsync</span><span class="p">();</span>
+        <span class="k">lock</span> <span class="p">(</span><span class="n">_instanceLock</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">Customers</span> <span class="p">=</span> <span class="n">customers</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">CountryRepository</span> <span class="p">:</span> <span class="n">ICountryRepository</span><span class="p">,</span> <span class="n">ICachedDataService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">static</span> <span class="k">readonly</span> <span class="kt">object</span> <span class="n">_instanceLock</span> <span class="p">=</span> <span class="k">new</span> <span class="kt">object</span><span class="p">();</span>
+
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CacheKey</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="k">nameof</span><span class="p">(</span><span class="n">Country</span><span class="p">);</span>
+
+    <span class="k">public</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">Country</span><span class="p">&gt;</span> <span class="n">Countries</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Reload</span><span class="p">(</span><span class="n">AppDbContext</span> <span class="n">dbContext</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">countries</span> <span class="p">=</span> <span class="k">await</span> <span class="n">dbContext</span><span class="p">.</span><span class="n">Countries</span><span class="p">.</span><span class="nf">ToListAsync</span><span class="p">();</span>
+        <span class="k">lock</span> <span class="p">(</span><span class="n">_instanceLock</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">Countries</span> <span class="p">=</span> <span class="n">countries</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>Now let’s modify the SaveChanges and the Reload implementations as well.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">AppDbContext</span> <span class="p">:</span> <span class="n">DbContext</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">&gt;</span> <span class="n">cachedDataServices</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="n">DbSet</span><span class="p">&lt;</span><span class="n">Customer</span><span class="p">&gt;</span> <span class="n">Customers</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">DbSet</span><span class="p">&lt;</span><span class="n">Country</span><span class="p">&gt;</span> <span class="n">Countries</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">AppDbContext</span><span class="p">(</span><span class="n">DbContextOptions</span><span class="p">&lt;</span><span class="n">AppDbContext</span><span class="p">&gt;</span> <span class="n">options</span><span class="p">,</span>
+                        <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">&gt;</span> <span class="n">cachedDataServices</span><span class="p">)</span>
+        <span class="p">:</span> <span class="k">base</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">cachedDataServices</span> <span class="p">=</span> <span class="n">cachedDataServices</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">protected</span> <span class="k">override</span> <span class="k">void</span> <span class="nf">OnModelCreating</span><span class="p">(</span><span class="n">ModelBuilder</span> <span class="n">modelBuilder</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">base</span><span class="p">.</span><span class="nf">OnModelCreating</span><span class="p">(</span><span class="n">modelBuilder</span><span class="p">);</span>
+
+        <span class="n">modelBuilder</span><span class="p">.</span><span class="nf">ApplyConfiguration</span><span class="p">(</span><span class="k">new</span> <span class="nf">CustomerConfiguration</span><span class="p">());</span>
+        <span class="n">modelBuilder</span><span class="p">.</span><span class="nf">ApplyConfiguration</span><span class="p">(</span><span class="k">new</span> <span class="nf">CountryConfiguration</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">override</span> <span class="k">async</span> <span class="n">Task</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;</span> <span class="nf">SaveChangesAsync</span><span class="p">(</span><span class="n">CancellationToken</span> <span class="n">cancellationToken</span> <span class="p">=</span> <span class="k">default</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">keys</span> <span class="p">=</span> <span class="n">ChangeTracker</span><span class="p">.</span><span class="n">Entries</span><span class="p">&lt;</span><span class="n">ICacheInfo</span><span class="p">&gt;()</span>
+                                <span class="p">.</span><span class="nf">Where</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="nf">IsAddedOrModifiedOrDeleted</span><span class="p">())</span>
+                                <span class="p">.</span><span class="nf">Select</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Entity</span><span class="p">.</span><span class="n">CacheKey</span><span class="p">)</span>
+                                <span class="p">.</span><span class="nf">Distinct</span><span class="p">()</span>
+                                <span class="p">.</span><span class="nf">ToList</span><span class="p">();</span>
+
+        <span class="kt">var</span> <span class="n">response</span> <span class="p">=</span> <span class="k">await</span> <span class="k">base</span><span class="p">.</span><span class="nf">SaveChangesAsync</span><span class="p">(</span><span class="n">cancellationToken</span><span class="p">);</span>
+
+        <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">key</span> <span class="k">in</span> <span class="n">keys</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">await</span> <span class="n">cachedDataServices</span><span class="p">.</span><span class="nf">FirstOrDefault</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">CacheKey</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="n">key</span><span class="p">))?.</span><span class="nf">Reload</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">response</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>In <code class="language-plaintext highlighter-rouge">EF Core 5</code>, we can use interceptors or events, so no need to overload the <code class="language-plaintext highlighter-rouge">SaveChangesAsync</code> method. But, the above approach will work in almost all versions, and that’s why I’m using it here.</p><p>Based on the new modified infrastructure, we have to be careful about how we register the services in the DI container. For an instance, we want both <code class="language-plaintext highlighter-rouge">ICustomerRepository</code> and <code class="language-plaintext highlighter-rouge">ICachedDataService</code> to return the same instance. If we do the following, we’ll get two singleton instances for each interface separately. And, that’s not what we want.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre><td class="rouge-code"><pre><span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICustomerRepository</span><span class="p">,</span> <span class="n">CustomerRepository</span><span class="p">&gt;();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">,</span> <span class="n">CustomerRepository</span><span class="p">&gt;();</span>
+</pre></table></code></div></div><p>In order to mitigate this, we can simply create the instance manually and provide it to the DI container.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre><td class="rouge-code"><pre><span class="kt">var</span> <span class="n">customerRepository</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">CustomerRepository</span><span class="p">();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICustomerRepository</span><span class="p">&gt;(</span><span class="n">customerRepository</span><span class="p">);</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">&gt;(</span><span class="n">customerRepository</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">countryRepository</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">CountryRepository</span><span class="p">();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICountryRepository</span><span class="p">&gt;(</span><span class="n">countryRepository</span><span class="p">);</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddSingleton</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">&gt;(</span><span class="n">countryRepository</span><span class="p">);</span>
+</pre></table></code></div></div><p>Finally, we’ll modify the startup code as well</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Program</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">static</span> <span class="k">async</span> <span class="n">Task</span> <span class="nf">Main</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">host</span> <span class="p">=</span> <span class="nf">CreateHostBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">).</span><span class="nf">Build</span><span class="p">();</span>
+
+        <span class="k">using</span> <span class="p">(</span><span class="kt">var</span> <span class="n">scope</span> <span class="p">=</span> <span class="n">host</span><span class="p">.</span><span class="n">Services</span><span class="p">.</span><span class="nf">CreateScope</span><span class="p">())</span>
+        <span class="p">{</span>
+            <span class="kt">var</span> <span class="n">services</span> <span class="p">=</span> <span class="n">scope</span><span class="p">.</span><span class="n">ServiceProvider</span><span class="p">;</span>
+            <span class="kt">var</span> <span class="n">dbContext</span> <span class="p">=</span> <span class="n">services</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">AppDbContext</span><span class="p">&gt;();</span>
+            <span class="kt">var</span> <span class="n">cachedDataServices</span> <span class="p">=</span> <span class="n">services</span><span class="p">.</span><span class="n">GetRequiredService</span><span class="p">&lt;</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">ICachedDataService</span><span class="p">&gt;&gt;();</span>
+
+            <span class="k">foreach</span> <span class="p">(</span><span class="kt">var</span> <span class="n">cachedDataService</span> <span class="k">in</span> <span class="n">cachedDataServices</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">await</span> <span class="n">cachedDataService</span><span class="p">.</span><span class="nf">Reload</span><span class="p">(</span><span class="n">dbContext</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">host</span><span class="p">.</span><span class="nf">Run</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">static</span> <span class="n">IHostBuilder</span> <span class="nf">CreateHostBuilder</span><span class="p">(</span><span class="kt">string</span><span class="p">[]</span> <span class="n">args</span><span class="p">)</span> <span class="p">=&gt;</span>
+        <span class="n">Host</span><span class="p">.</span><span class="nf">CreateDefaultBuilder</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="p">.</span><span class="nf">ConfigureWebHostDefaults</span><span class="p">(</span><span class="n">webBuilder</span> <span class="p">=&gt;</span>
+            <span class="p">{</span>
+                <span class="n">webBuilder</span><span class="p">.</span><span class="n">UseStartup</span><span class="p">&lt;</span><span class="n">Startup</span><span class="p">&gt;();</span>
+            <span class="p">});</span>
+<span class="p">}</span>
+</pre></table></code></div></div><h2 id="summary">Summary</h2><p>You can find the full sample in the following repo <a href="https://github.com/fiseni/CachingSample">here</a>. In the sample, “Cities” are implemented through <code class="language-plaintext highlighter-rouge">IMemoryCache</code> and decorator pattern, while the “Customer” and “Countries” with the alternative approach.</p><p>The standard caching implementation serves us well in various use cases. Using that approach it’s really easy to cache various sets based on the input filters (paginated results, applied criteria, etc).</p><p>In specific use cases, where we don’t have a large set of data, and we want to hold the whole collection; then the described alternative approaches might be a better solution.</p><p>Next time, I’ll describe how to improve this infrastructure even further. We’ll create better abstractions to remove some boilerplate code, and will provide the ability to cache various filtered sets of the collection. Practically, on cache invalidation, we’ll invalidate all caches for that particular entity, and then cache various filtered data on the next first request.</p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/software-development/'>Software Development</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/cache/" class="post-tag no-text-decoration" >cache</a> <a href="/tags/dotnetcore/" class="post-tag no-text-decoration" >dotnetcore</a> <a href="/tags/design-patterns/" class="post-tag no-text-decoration" >design patterns</a> <a href="/tags/software-architecture/" class="post-tag no-text-decoration" >software architecture</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Alternative caching implementations and cache invalidation! - Fati Iseni - Blog&url=https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Alternative caching implementations and cache invalidation! - Fati Iseni - Blog&u=https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/" data-toggle="tooltip" data-placement="top" title="Linkedin" target="_blank" rel="noopener" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-2 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"> <span>Recent Update</span><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/default-item-for-entity-collections/">Default item for a given entity's collection</a><li><a href="/posts/how-to-remove-microsoft-work-school-account/">How to remove a Microsoft work/school account?</a><li><a href="/posts/what-is-the-proper-usage-of-domain-events/">What is the proper usage of domain events?</a><li><a href="/posts/immutable-entities-in-ef-core/">Immutable entities and value objects in EF Core!</a><li><a href="/posts/open-close-principle-and-runtime-di-configuration/">Open-Closed Principle and runtime DI configurations!</a></ul></div><div id="access-tags"> <span>Trending Tags</span><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/design-patterns/">design patterns</a> <a class="post-tag" href="/tags/dotnetcore/">dotnetcore</a> <a class="post-tag" href="/tags/software-architecture/">software architecture</a> <a class="post-tag" href="/tags/ddd/">ddd</a> <a class="post-tag" href="/tags/efcore/">EFCore</a> <a class="post-tag" href="/tags/productivity/">Productivity</a> <a class="post-tag" href="/tags/auditing/">Auditing</a> <a class="post-tag" href="/tags/azure/">azure</a> <a class="post-tag" href="/tags/cache/">cache</a> <a class="post-tag" href="/tags/dependency-injection/">dependency injection</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"> <span class="pl-3 pt-2 mb-2">Contents</span><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-9"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/open-close-principle-and-runtime-di-configuration/"><div class="card-body"> <span class="timeago small" > Dec 2, 2020 <i class="unloaded">2020-12-02T17:00:00+01:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Open-Closed Principle and runtime DI configurations!</h3><div class="text-muted small"><p> I just recently published a Nuget package that offers some extensions to the .NET Core’s built-in DI container, practically extensions to IServiceCollection. The extensions provide the ability for ...</p></div></div></a></div><div class="card"> <a href="/posts/default-item-for-entity-collections/"><div class="card-body"> <span class="timeago small" > May 17 <i class="unloaded">2021-05-17T18:00:00+02:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Default item for a given entity's collection</h3><div class="text-muted small"><p> In this post, I’ll elaborate on the case when you need to mark an item as default for a given entity’s collection. Let’s assume we have Customer and Address entities, and each customer may have mor...</p></div></div></a></div><div class="card"> <a href="/posts/what-is-a-domain-model/"><div class="card-body"> <span class="timeago small" > Nov 5, 2020 <i class="unloaded">2020-11-05T12:00:00+01:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>What is a domain model?</h3><div class="text-muted small"><p> I’ve been asked this question very often, especially by the new developers. So, let’s try to explain the term and clear some misconceptions. The term is being popularized with the adoption of DDD (...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/open-close-principle-and-runtime-di-configuration/" class="btn btn-outline-primary"><p>Open-Closed Principle and runtime DI configurations!</p></a> <a href="/posts/immutable-entities-in-ef-core/" class="btn btn-outline-primary"><p>Immutable entities and value objects in EF Core!</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//fiseni.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://fiseni.com/posts/alternative-caching-implementations-and-cache-invalidation/'; this.page.identifier = '/posts/alternative-caching-implementations-and-cache-invalidation/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2021 <a href="https://twitter.com/fiseni">Fati Iseni</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/design-patterns/">design patterns</a> <a class="post-tag" href="/tags/dotnetcore/">dotnetcore</a> <a class="post-tag" href="/tags/software-architecture/">software architecture</a> <a class="post-tag" href="/tags/ddd/">ddd</a> <a class="post-tag" href="/tags/efcore/">EFCore</a> <a class="post-tag" href="/tags/productivity/">Productivity</a> <a class="post-tag" href="/tags/auditing/">Auditing</a> <a class="post-tag" href="/tags/azure/">azure</a> <a class="post-tag" href="/tags/cache/">cache</a> <a class="post-tag" href="/tags/dependency-injection/">dependency injection</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://fiseni.com{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script> <script async src="https://www.googletagmanager.com/gtag/js?id=G-6N7H7NRJZ7"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-6N7H7NRJZ7'); </script>

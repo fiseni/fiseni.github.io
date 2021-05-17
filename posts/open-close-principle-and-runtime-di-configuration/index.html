@@ -1,0 +1,389 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><meta name="theme" content="Chirpy v2.5.1"><meta name="generator" content="Jekyll v4.2.0" /><meta property="og:title" content="Open-Closed Principle and runtime DI configurations!" /><meta name="author" content="Fati Iseni" /><meta property="og:locale" content="en_US" /><meta name="description" content="How to improve your design and adhere to Open-Closed Principle by using dynamic/runtime DI configuration." /><meta property="og:description" content="How to improve your design and adhere to Open-Closed Principle by using dynamic/runtime DI configuration." /><link rel="canonical" href="https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/" /><meta property="og:url" content="https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/" /><meta property="og:site_name" content="Fati Iseni - Blog" /><meta property="og:image" content="https://fiseni.com/assets/img/pozitron-cover.png" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2020-12-02T17:00:00+01:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://fiseni.com/assets/img/pozitron-cover.png" /><meta property="twitter:title" content="Open-Closed Principle and runtime DI configurations!" /><meta name="twitter:site" content="@fiseni" /><meta name="twitter:creator" content="@fiseni" /><meta name="google-site-verification" content="p9Rvv10SRN6FJ9f7Vbg7Pnrts_Y9_nDh4zVdFcfx7Ls" /> <script type="application/ld+json"> {"headline":"Open-Closed Principle and runtime DI configurations!","dateModified":"2020-12-02T17:00:00+01:00","description":"How to improve your design and adhere to Open-Closed Principle by using dynamic/runtime DI configuration.","datePublished":"2020-12-02T17:00:00+01:00","@type":"BlogPosting","image":"https://fiseni.com/assets/img/pozitron-cover.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/"},"url":"https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/","author":{"@type":"Person","name":"Fati Iseni"},"@context":"https://schema.org"}</script><title>Open-Closed Principle and runtime DI configurations! | Fati Iseni - Blog</title><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" as="style" href="/assets/css/post.css"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script async src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4/dist/js/bootstrap.min.js"></script> <script async src="/assets/js/post.min.js"></script> <script defer src="/app.js"></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/fati-iseni.jpg" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">Fati Iseni</a></div><div class="site-subtitle font-italic">Software Architect</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-sun" dark-mode-invisible></i> <i class="mode-toggle fas fa-moon" light-mode-invisible></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.mode != null) { if (this.mode == ModeToggle.DARK_MODE) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.mode != null) { if (self.mode == ModeToggle.DARK_MODE) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/fiseni" aria-label="github" target="_blank" rel="noopener"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/fiseni" aria-label="twitter" target="_blank" rel="noopener"> <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/fati-iseni-193928127" aria-label="linkedin" target="_blank" rel="noopener"> <i class="fab fa-linkedin"></i> </a> <a href="/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Open-Closed Principle and runtime DI configurations!</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-9"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"> <img src="/assets/img/pozitron-cover.png" data-src="/assets/img/pozitron-cover.png" class="post-cover-img"><h1 data-toc-skip>Open-Closed Principle and runtime DI configurations!</h1><div class="post-meta text-muted d-flex flex-column justify-content-center"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Wed, Dec 2, 2020, 5:00 PM +0100" > Dec 2, 2020 <i class="unloaded">2020-12-02T17:00:00+01:00</i> </span> by <span class="author"> Fati Iseni </span></div></div><div class="post-content"><p>I just recently published a Nuget package that offers some extensions to the .NET Core’s built-in DI container, practically extensions to <code class="language-plaintext highlighter-rouge">IServiceCollection</code>. The extensions provide the ability for dynamic/runtime DI configuration, through external config files. You can find the repo <a href="https://github.com/fiseni/PozitronDev.DIConfiguration">here</a>.</p><p>This is not a new approach at all, and in some other platforms is being heavily used. If anyone used Java with Spring, at some point, you surely have utilized XML based injection. On the other hand in .NET this is actively discouraged, for a good reason. Giving up the compile-time error proofing not always is a bright idea. Of course, there is a difference in how “linking” and “reflection” works in Java and .NET, and that affects the design decisions. But, generally, strongly typed and compile-time configurations are always favored in .NET world.</p><p>Then, what all this is about? What’s the benefit here, if any?</p><h2 id="motivation">Motivation</h2><p>Shortly said, such a design offers the ability to switch implementations on the fly, on runtime, not requiring to re-compile the solution; restarting the application is all you need. But, do we really need that? We already have other mechanisms and patterns on how to provide some form of flexibility in this context. Before going any further, let’s just shortly remind ourselves of Open-Closed Principle, and what that means.</p><p>As a brief recap, the OCP predicates that we should have constructs that are open to extensions and closed to changes. This means if we need to add a “behavior” to a solution, or even to a class; we should be able to do that without changing the existing constructs. Even more simplified, if you have switch statements and too many conditional logic; it might be a sign that the behavior is too much hardcoded, and might be refactored in a better way.</p><p>The main logic and the driver here is that by modifying existing constructs, you’re increasing the likelihood to introduce new bugs and issues to the existing features. If you find yourself refactoring the class and its methods over and over again, you’ll likely end up with some inconsistencies. Also, you’ll sneak in, and update/refactor your existing unit tests to reflect the new reality you created, which is not good practice at all. By striving to design an architecture, where you can add new requirements by just creating new constructs, you’ll get a more robust and error-prone solution. That’s all what OCP means.</p><p>Once that said, now let’s imagine a scenario and try to offer various solutions to the problem in hand. Imagine you have an enterprise application (e.g. ERP solution), and you offering it to various clients, deployed in their premises. One of the requirements of the solution is to calculate some price for some particular workflow. As the number of your clients increases, they all want some minor, or major changes in how this calculation is done. The rest of the workflow remains the same, but the price calculation varies significantly depending on the customer.</p><h2 id="solution-1">Solution 1</h2><p>Let’s start with the most simple solution. We have one single method which holds all the logic and handles all the requirements.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">MyService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">MyService</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">someBaseValue</span> <span class="p">=</span> <span class="n">someBaseValue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetCalculatedPrice</span><span class="p">(</span><span class="kt">string</span> <span class="n">clientType</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">clientType</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="s">"clientType1"</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Round</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">someBaseValue</span> <span class="p">*</span> <span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clientType</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="s">"clientType2"</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Round</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">someBaseValue</span> <span class="p">*</span> <span class="m">10</span> <span class="p">+</span> <span class="m">3</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clientType</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="s">"clientType3"</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">someBaseValue</span> <span class="p">-</span> <span class="m">2</span><span class="p">)</span> <span class="p">*</span> <span class="m">5</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">NotSupportedException</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>Obviously, this is not the best option. If we get a new client who requires new calculation rules, we’ll end up updating the same method. We’ll be forced to update/modify the unit test for this method as well. Not a great place to be.</p><h2 id="solution-2">Solution 2</h2><p>In order to improve this, first and foremost, we can start by extracting the calculation logic for each customer into separate methods.</p><p>But, let’s take a moment and re-think it. Why methods? Why not separate classes? Why not classes which implement a particular interface?</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">interface</span> <span class="nc">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Type1Calculator</span> <span class="p">:</span> <span class="n">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Round</span><span class="p">(</span><span class="n">someBaseValue</span> <span class="p">*</span> <span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Type2Calculator</span> <span class="p">:</span> <span class="n">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Round</span><span class="p">(</span><span class="n">someBaseValue</span> <span class="p">*</span> <span class="m">10</span> <span class="p">+</span> <span class="m">3</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Type3Calculator</span> <span class="p">:</span> <span class="n">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">someBaseValue</span> <span class="p">-</span> <span class="m">2</span><span class="p">)</span> <span class="p">*</span> <span class="m">5</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">MyService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">MyService</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">someBaseValue</span> <span class="p">=</span> <span class="n">someBaseValue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetCalculatedPrice</span><span class="p">(</span><span class="kt">string</span> <span class="n">clientType</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">IPriceCalculator</span> <span class="n">calculator</span> <span class="p">=</span> <span class="k">null</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">clientType</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="s">"clientType1"</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">calculator</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Type1Calculator</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clientType</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="s">"clientType2"</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">calculator</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Type2Calculator</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">clientType</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="s">"clientType3"</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="n">calculator</span> <span class="p">=</span> <span class="k">new</span> <span class="nf">Type3Calculator</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">calculator</span> <span class="p">!=</span> <span class="k">null</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="n">calculator</span><span class="p">.</span><span class="nf">GetPrice</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">someBaseValue</span><span class="p">);</span>
+        <span class="p">}</span>   
+        
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">NotSupportedException</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>We extracted the logic for each client into a separate class. We defined a contract/interface to standardize the output of the operation. We still have the ugly conditional logic, but this seems much better. If we have to change the calculation for any client, we’ll change the corresponding class, and nothing else.</p><p>Note: In the newer versions, in <code class="language-plaintext highlighter-rouge">C#8</code> and <code class="language-plaintext highlighter-rouge">C#9</code>, we can simplify the conditions with pattern matching. For the sake of simplicity, we’ll stick to the traditional IFs.</p><h2 id="solution-3">Solution 3</h2><p>Would be nice to get rid of the “selector” logic completely. What if each calculator holds the information for whom they’re meant to?</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">interface</span> <span class="nc">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="kt">string</span> <span class="n">ClientType</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Type1Calculator</span> <span class="p">:</span> <span class="n">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">ClientType</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="s">"clientType1"</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Round</span><span class="p">(</span><span class="n">someBaseValue</span> <span class="p">*</span> <span class="m">10</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Type2Calculator</span> <span class="p">:</span> <span class="n">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">ClientType</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="s">"clientType2"</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">Math</span><span class="p">.</span><span class="nf">Round</span><span class="p">(</span><span class="n">someBaseValue</span> <span class="p">*</span> <span class="m">10</span> <span class="p">+</span> <span class="m">3</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Type3Calculator</span> <span class="p">:</span> <span class="n">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">ClientType</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span> <span class="p">=</span> <span class="s">"clientType3"</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">someBaseValue</span> <span class="p">-</span> <span class="m">2</span><span class="p">)</span> <span class="p">*</span> <span class="m">5</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">MyService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">IPriceCalculator</span><span class="p">&gt;</span> <span class="n">priceCalculators</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">MyService</span><span class="p">(</span><span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">IPriceCalculator</span><span class="p">&gt;</span> <span class="n">priceCalculators</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">priceCalculators</span> <span class="p">=</span> <span class="n">priceCalculators</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetCalculatedPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">,</span> <span class="kt">string</span> <span class="n">clientType</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">calculator</span> <span class="p">=</span> <span class="n">priceCalculators</span><span class="p">.</span><span class="nf">FirstOrDefault</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">ClientType</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="n">clientType</span><span class="p">));</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">calculator</span> <span class="p">==</span> <span class="k">null</span><span class="p">)</span>
+        <span class="p">{</span> 
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">NotSupportedException</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">calculator</span><span class="p">.</span><span class="nf">GetPrice</span><span class="p">(</span><span class="n">someBaseValue</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>Also, you should register all implementations in your DI container</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre><td class="rouge-code"><pre><span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IPriceCalculator</span><span class="p">,</span> <span class="n">Type1Calculator</span><span class="p">&gt;();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IPriceCalculator</span><span class="p">,</span> <span class="n">Type2Calculator</span><span class="p">&gt;();</span>
+<span class="n">services</span><span class="p">.</span><span class="n">AddScoped</span><span class="p">&lt;</span><span class="n">IPriceCalculator</span><span class="p">,</span> <span class="n">Type3Calculator</span><span class="p">&gt;();</span>
+</pre></table></code></div></div><p>This is way better, right? We have no hard-coded conditional logic at all. Even if we have to create a new calculator, we can simply add a new class (new implementation) and wire it up to our DI container. The downside of this approach is that we’re creating instances we don’t actually need. We need one single calculator, and yet we’re instantiating all of them.</p><h2 id="solution-4">Solution 4</h2><p>In this last option, we’ll try to mitigate the last issue (not an issue per se). We want to inject one single implementation, the required one for the corresponding client. And this is the case where dynamic/runtime DI configuration comes really handy.</p><p>Configuration in the <code class="language-plaintext highlighter-rouge">appsetting.json</code></p><div class="language-json highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre><td class="rouge-code"><pre><span class="p">{</span><span class="w">
+  </span><span class="nl">"Bindings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"binding1"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"service"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SampleLibrary.IPriceCalculator, SampleLibrary"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"implementation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SampleLibrary.Type1Calculator, SampleLibrary"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"scope"</span><span class="p">:</span><span class="w"> </span><span class="s2">"scoped"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre></table></code></div></div><p>Wiring it up in DI container</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Startup</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="n">IConfiguration</span> <span class="n">Configuration</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">Startup</span><span class="p">(</span><span class="n">IConfiguration</span> <span class="n">configuration</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">Configuration</span> <span class="p">=</span> <span class="n">configuration</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">ConfigureServices</span><span class="p">(</span><span class="n">IServiceCollection</span> <span class="n">services</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">services</span><span class="p">.</span><span class="nf">AddBindings</span><span class="p">(</span><span class="n">Configuration</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>No more we need the type identifier in the interface</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">interface</span> <span class="nc">IPriceCalculator</span>
+<span class="p">{</span>
+    <span class="kt">decimal</span> <span class="nf">GetPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>And the actual implementation in our service</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">MyService</span>
+<span class="p">{</span>
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">IPriceCalculator</span> <span class="n">priceCalculator</span><span class="p">;</span>
+
+    <span class="k">public</span> <span class="nf">MyService</span><span class="p">(</span><span class="n">IPriceCalculator</span> <span class="n">priceCalculator</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">priceCalculator</span> <span class="p">==</span> <span class="k">null</span><span class="p">)</span>
+            <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">priceCalculator</span><span class="p">));</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="n">priceCalculators</span> <span class="p">=</span> <span class="n">priceCalculators</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="nf">GetCalculatedPrice</span><span class="p">(</span><span class="kt">decimal</span> <span class="n">someBaseValue</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">calculator</span><span class="p">.</span><span class="nf">GetPrice</span><span class="p">(</span><span class="n">someBaseValue</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>I do believe this is quite a clean solution. No longer instantiating and injecting unnecessary objects, no longer you have hard-coded selector logic, and no longer you end up modifying the same constructs over and over again. For each client, you create and deploy a different configuration file, injecting the correct and requested implementation.</p><h2 id="conclusion">Conclusion</h2><p>Having the option to switch the implementations easily and modify the behavior of the solution on the fly, is quite a handy and nice feature. The only caveat is that we gave up the commodity of the compile-time checks. On the other hand, it’s not that the configuration issues/errors will just sneak into our code. If there is a misconfiguration we’ll get a runtime exception during the startup, so it’s easy to spot and rectify the issues. Yet, it’s not the same experience as fixing issues in a development environment, and that’s something to consider.</p><p>It’s important to remember, not necessarily you have to move all DI configurations to an external config file. You still can do the binding for most of the services in your code. Then, for particular cases where you have multiple implementations, and you want more flexibility, you can take only those definitions out.</p><p>Anyhow this is a love/hate game :) The important point is having a choice, and then you go and choose your own design and whatever fits you most!</p><p>Cheers!</p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/software-development/'>Software Development</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/dependency-injection/" class="post-tag no-text-decoration" >dependency injection</a> <a href="/tags/dotnetcore/" class="post-tag no-text-decoration" >dotnetcore</a> <a href="/tags/design-patterns/" class="post-tag no-text-decoration" >design patterns</a> <a href="/tags/software-architecture/" class="post-tag no-text-decoration" >software architecture</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Open-Closed Principle and runtime DI configurations! - Fati Iseni - Blog&url=https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Open-Closed Principle and runtime DI configurations! - Fati Iseni - Blog&u=https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/" data-toggle="tooltip" data-placement="top" title="Linkedin" target="_blank" rel="noopener" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-2 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"> <span>Recent Update</span><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/default-item-for-entity-collections/">Default item for a given entity's collection</a><li><a href="/posts/how-to-remove-microsoft-work-school-account/">How to remove a Microsoft work/school account?</a><li><a href="/posts/what-is-the-proper-usage-of-domain-events/">What is the proper usage of domain events?</a><li><a href="/posts/immutable-entities-in-ef-core/">Immutable entities and value objects in EF Core!</a><li><a href="/posts/open-close-principle-and-runtime-di-configuration/">Open-Closed Principle and runtime DI configurations!</a></ul></div><div id="access-tags"> <span>Trending Tags</span><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/design-patterns/">design patterns</a> <a class="post-tag" href="/tags/dotnetcore/">dotnetcore</a> <a class="post-tag" href="/tags/software-architecture/">software architecture</a> <a class="post-tag" href="/tags/ddd/">ddd</a> <a class="post-tag" href="/tags/efcore/">EFCore</a> <a class="post-tag" href="/tags/productivity/">Productivity</a> <a class="post-tag" href="/tags/auditing/">Auditing</a> <a class="post-tag" href="/tags/azure/">azure</a> <a class="post-tag" href="/tags/cache/">cache</a> <a class="post-tag" href="/tags/dependency-injection/">dependency injection</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"> <span class="pl-3 pt-2 mb-2">Contents</span><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-9"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/alternative-caching-implementations-and-cache-invalidation/"><div class="card-body"> <span class="timeago small" > Dec 9, 2020 <i class="unloaded">2020-12-09T17:00:00+01:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Alternative caching implementations and cache invalidation!</h3><div class="text-muted small"><p> Today I’ll be talking about caching and various ways to implement the same. We’ll also show how to invalidate the cache on demand if using Entity Framework. The caching feature is almost mandatory...</p></div></div></a></div><div class="card"> <a href="/posts/default-item-for-entity-collections/"><div class="card-body"> <span class="timeago small" > May 17 <i class="unloaded">2021-05-17T18:00:00+02:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Default item for a given entity's collection</h3><div class="text-muted small"><p> In this post, I’ll elaborate on the case when you need to mark an item as default for a given entity’s collection. Let’s assume we have Customer and Address entities, and each customer may have mor...</p></div></div></a></div><div class="card"> <a href="/posts/what-is-a-domain-model/"><div class="card-body"> <span class="timeago small" > Nov 5, 2020 <i class="unloaded">2020-11-05T12:00:00+01:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>What is a domain model?</h3><div class="text-muted small"><p> I’ve been asked this question very often, especially by the new developers. So, let’s try to explain the term and clear some misconceptions. The term is being popularized with the adoption of DDD (...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/how-to-implement-auditing-on-your-entities/" class="btn btn-outline-primary"><p>How to implement auditing on your entities!</p></a> <a href="/posts/alternative-caching-implementations-and-cache-invalidation/" class="btn btn-outline-primary"><p>Alternative caching implementations and cache invalidation!</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//fiseni.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://fiseni.com/posts/open-close-principle-and-runtime-di-configuration/'; this.page.identifier = '/posts/open-close-principle-and-runtime-di-configuration/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2021 <a href="https://twitter.com/fiseni">Fati Iseni</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/design-patterns/">design patterns</a> <a class="post-tag" href="/tags/dotnetcore/">dotnetcore</a> <a class="post-tag" href="/tags/software-architecture/">software architecture</a> <a class="post-tag" href="/tags/ddd/">ddd</a> <a class="post-tag" href="/tags/efcore/">EFCore</a> <a class="post-tag" href="/tags/productivity/">Productivity</a> <a class="post-tag" href="/tags/auditing/">Auditing</a> <a class="post-tag" href="/tags/azure/">azure</a> <a class="post-tag" href="/tags/cache/">cache</a> <a class="post-tag" href="/tags/dependency-injection/">dependency injection</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://fiseni.com{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script> <script async src="https://www.googletagmanager.com/gtag/js?id=G-6N7H7NRJZ7"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-6N7H7NRJZ7'); </script>

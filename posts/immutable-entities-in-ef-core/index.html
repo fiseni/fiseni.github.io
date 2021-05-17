@@ -1,0 +1,633 @@
+<!DOCTYPE html><html lang="en" ><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><meta name="theme" content="Chirpy v2.5.1"><meta name="generator" content="Jekyll v4.2.0" /><meta property="og:title" content="Immutable entities and value objects in EF Core!" /><meta name="author" content="Fati Iseni" /><meta property="og:locale" content="en_US" /><meta name="description" content="How to implement and persist immutable entities and value object in Entity Framework Core." /><meta property="og:description" content="How to implement and persist immutable entities and value object in Entity Framework Core." /><link rel="canonical" href="https://fiseni.com/posts/immutable-entities-in-ef-core/" /><meta property="og:url" content="https://fiseni.com/posts/immutable-entities-in-ef-core/" /><meta property="og:site_name" content="Fati Iseni - Blog" /><meta property="og:image" content="https://fiseni.com/assets/img/pozitron-cover.png" /><meta property="og:type" content="article" /><meta property="article:published_time" content="2021-03-10T17:00:00+01:00" /><meta name="twitter:card" content="summary_large_image" /><meta property="twitter:image" content="https://fiseni.com/assets/img/pozitron-cover.png" /><meta property="twitter:title" content="Immutable entities and value objects in EF Core!" /><meta name="twitter:site" content="@fiseni" /><meta name="twitter:creator" content="@fiseni" /><meta name="google-site-verification" content="p9Rvv10SRN6FJ9f7Vbg7Pnrts_Y9_nDh4zVdFcfx7Ls" /> <script type="application/ld+json"> {"headline":"Immutable entities and value objects in EF Core!","dateModified":"2021-03-10T17:00:00+01:00","description":"How to implement and persist immutable entities and value object in Entity Framework Core.","datePublished":"2021-03-10T17:00:00+01:00","@type":"BlogPosting","image":"https://fiseni.com/assets/img/pozitron-cover.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://fiseni.com/posts/immutable-entities-in-ef-core/"},"url":"https://fiseni.com/posts/immutable-entities-in-ef-core/","author":{"@type":"Person","name":"Fati Iseni"},"@context":"https://schema.org"}</script><title>Immutable entities and value objects in EF Core! | Fati Iseni - Blog</title><link rel="shortcut icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="icon" href="/assets/img/favicons/favicon.ico" type="image/x-icon"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon.png"><link rel="apple-touch-icon" href="/assets/img/favicons/apple-icon-precomposed.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicons/apple-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicons/apple-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicons/apple-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicons/apple-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicons/apple-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicons/apple-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicons/apple-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicons/apple-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-icon-180x180.png"><link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicons/android-icon-192x192.png"><link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicons/favicon-96x96.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png"><link rel="manifest" href="/assets/img/favicons/manifest.json"><meta name='msapplication-config' content='/assets/img/favicons/browserconfig.xml'><meta name="msapplication-TileColor" content="#ffffff"><meta name="msapplication-TileImage" content="/assets/img/favicons/ms-icon-144x144.png"><meta name="theme-color" content="#ffffff"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://fonts.gstatic.com"><link rel="preconnect" href="https://www.google-analytics.com" crossorigin="use-credentials"><link rel="dns-prefetch" href="https://www.google-analytics.com"><link rel="preconnect" href="https://www.googletagmanager.com" crossorigin="anonymous"><link rel="dns-prefetch" href="https://www.googletagmanager.com"><link rel="preconnect" href="cdn.jsdelivr.net"><link rel="dns-prefetch" href="cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous"><link rel="preload" as="style" href="/assets/css/post.css"><link rel="stylesheet" href="/assets/css/post.css"><link rel="preload" as="style" href="/assets/css/lib/bootstrap-toc.min.css"><link rel="stylesheet" href="/assets/css/lib/bootstrap-toc.min.css" /> <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script> <script async src="https://cdn.jsdelivr.net/combine/npm/popper.js@1.15.0,npm/bootstrap@4/dist/js/bootstrap.min.js"></script> <script async src="/assets/js/post.min.js"></script> <script defer src="/app.js"></script><body data-spy="scroll" data-target="#toc"><div id="sidebar" class="d-flex flex-column"><div id="nav-wrapper"><div id="profile-wrapper" class="d-flex flex-column"><div id="avatar" class="d-flex justify-content-center"> <a href="/" alt="avatar"> <img src="/assets/img/fati-iseni.jpg" alt="avatar" onerror="this.style.display='none'"> </a></div><div class="profile-text mt-3"><div class="site-title"> <a href="/">Fati Iseni</a></div><div class="site-subtitle font-italic">Software Architect</div></div></div><ul class="nav flex-column"><li class="nav-item d-flex justify-content-center "> <a href="/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-home ml-xl-3 mr-xl-3 unloaded"></i> <span>HOME</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/categories/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-stream ml-xl-3 mr-xl-3 unloaded"></i> <span>CATEGORIES</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/tags/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-tags ml-xl-3 mr-xl-3 unloaded"></i> <span>TAGS</span> </a><li class="nav-item d-flex justify-content-center "> <a href="/tabs/archives/" class="nav-link d-flex justify-content-center align-items-center w-100"> <i class="fa-fw fas fa-archive ml-xl-3 mr-xl-3 unloaded"></i> <span>ARCHIVES</span> </a></ul></div><div class="sidebar-bottom d-flex flex-wrap justify-content-around mt-4"> <span id="mode-toggle-wrapper"> <i class="mode-toggle fas fa-sun" dark-mode-invisible></i> <i class="mode-toggle fas fa-moon" light-mode-invisible></i> <script type="text/javascript"> class ModeToggle { static get MODE_KEY() { return "mode"; } static get DARK_MODE() { return "dark"; } static get LIGHT_MODE() { return "light"; } constructor() { if (this.mode != null) { if (this.mode == ModeToggle.DARK_MODE) { if (!this.isSysDarkPrefer) { this.setDark(); } } else { if (this.isSysDarkPrefer) { this.setLight(); } } } var self = this; /* always follow the system prefers */ this.sysDarkPrefers.addListener(function() { if (self.mode != null) { if (self.mode == ModeToggle.DARK_MODE) { if (!self.isSysDarkPrefer) { self.setDark(); } } else { if (self.isSysDarkPrefer) { self.setLight(); } } self.clearMode(); } }); } /* constructor() */ setDark() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.DARK_MODE); } setLight() { $('html').attr(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); sessionStorage.setItem(ModeToggle.MODE_KEY, ModeToggle.LIGHT_MODE); } clearMode() { $('html').removeAttr(ModeToggle.MODE_KEY); sessionStorage.removeItem(ModeToggle.MODE_KEY); } get sysDarkPrefers() { return window.matchMedia("(prefers-color-scheme: dark)"); } get isSysDarkPrefer() { return this.sysDarkPrefers.matches; } get isDarkMode() { return this.mode == ModeToggle.DARK_MODE; } get isLightMode() { return this.mode == ModeToggle.LIGHT_MODE; } get hasMode() { return this.mode != null; } get mode() { return sessionStorage.getItem(ModeToggle.MODE_KEY); } flipMode() { if (this.hasMode) { if (this.isSysDarkPrefer) { if (this.isLightMode) { this.clearMode(); } else { this.setLight(); } } else { if (this.isDarkMode) { this.clearMode(); } else { this.setDark(); } } } else { if (this.isSysDarkPrefer) { this.setLight(); } else { this.setDark(); } } } /* flipMode() */ } /* ModeToggle */ let toggle = new ModeToggle(); $(".mode-toggle").click(function() { toggle.flipMode(); }); </script> </span> <span class="icon-border"></span> <a href="https://github.com/fiseni" aria-label="github" target="_blank" rel="noopener"> <i class="fab fa-github-alt"></i> </a> <a href="https://twitter.com/fiseni" aria-label="twitter" target="_blank" rel="noopener"> <i class="fab fa-twitter"></i> </a> <a href="https://www.linkedin.com/in/fati-iseni-193928127" aria-label="linkedin" target="_blank" rel="noopener"> <i class="fab fa-linkedin"></i> </a> <a href="/feed.xml" aria-label="rss" > <i class="fas fa-rss"></i> </a></div></div><div id="topbar-wrapper" class="row justify-content-center topbar-down"><div id="topbar" class="col-11 d-flex h-100 align-items-center justify-content-between"> <span id="breadcrumb"> <span> <a href="/"> Posts </a> </span> <span>Immutable entities and value objects in EF Core!</span> </span> <i id="sidebar-trigger" class="fas fa-bars fa-fw"></i><div id="topbar-title"> Post</div><i id="search-trigger" class="fas fa-search fa-fw"></i> <span id="search-wrapper" class="align-items-center"> <i class="fas fa-search fa-fw"></i> <input class="form-control" id="search-input" type="search" aria-label="search" placeholder="Search..."> <i class="fa fa-times-circle fa-fw" id="search-cleaner"></i> </span> <span id="search-cancel" >Cancel</span></div></div><div id="main-wrapper"><div id="main"><div class="row"><div id="post-wrapper" class="col-12 col-lg-11 col-xl-9"><div class="post pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"> <img src="/assets/img/pozitron-cover.png" data-src="/assets/img/pozitron-cover.png" class="post-cover-img"><h1 data-toc-skip>Immutable entities and value objects in EF Core!</h1><div class="post-meta text-muted d-flex flex-column justify-content-center"><div> Posted <span class="timeago " data-toggle="tooltip" data-placement="bottom" title="Wed, Mar 10, 2021, 5:00 PM +0100" > Mar 10 <i class="unloaded">2021-03-10T17:00:00+01:00</i> </span> by <span class="author"> Fati Iseni </span></div></div><div class="post-content"><p><em>You can find the code and the full sample <a href="https://github.com/fiseni/ImmutabilitySample">here</a>.</em></p><p>Immutability is a trendy topic nowadays. The immutable constructs can be handy and can offer many benefits in different scenarios. They can significantly improve your domain model by capturing and mimicking various business processes more accurately. We won’t dive into all the pros and cons of adopting the immutability, which will require a separate article. We’ll only demonstrate how to implement and persist them in <code class="language-plaintext highlighter-rouge">EF Core</code> once you have decided to utilize such constructs in your design.</p><p>Let’s start with a sample model as shown below</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Order</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">OrderNo</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">DateTime</span> <span class="n">Date</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CustomerFirstName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CustomerLastName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">CustomerEmail</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Street</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">City</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">PostalCode</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Country</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">GrandTotal</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;</span> <span class="n">OrderItems</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;();</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">OrderItem</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">Price</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>In this scenario, we have defined <code class="language-plaintext highlighter-rouge">Order</code> and <code class="language-plaintext highlighter-rouge">OrderItem</code> models. For now, they’re fully anemic models, with no behavior, and no encapsulation applied. Simply said, they’re just data objects. In the next sections, we’ll improve the model and define the necessary configurations for <code class="language-plaintext highlighter-rouge">EF Core</code>.</p><h2 id="designing-the-domain-model">Designing the domain model</h2><p>While designing the entities and the domain model in general, it is wise to step back, disconnect yourself from the code and think of the actual business domain in the real world. In our case, first and foremost, is there any concept in the real-world which corresponds to an “empty order”? Imagine you’re trying to buy a product, but you oppose sharing any information about the recipient, name, address to be shipped, or any other info. That doesn’t make much sense right? The “order” becomes a “thing” once it contains a certain piece of information, otherwise, it’s just a meaningless word. Having that in mind, then the question is why would we allow an empty <code class="language-plaintext highlighter-rouge">Order</code> object in our application? Obviously, our object should utilize a constructor, and accept all required information as parameters. Once instantiated, we want to be sure that the object is not in a corrupted state.</p><p>The next step would be to go through all the properties and try to make sense of what they represent and what changes we can introduce to improve the model</p><ul><li><code class="language-plaintext highlighter-rouge">Id</code> - This is an identifier of the entity/record. In our case, it’s not a business concept but just required technical information. Once the entity is assigned an identifier, there is no reason for the <code class="language-plaintext highlighter-rouge">Id</code> to change.<li><code class="language-plaintext highlighter-rouge">OrderNo</code> - This represents the number of the document/order. This should be a unique identifier, composed of some given business rules. Once the document gets its number, no longer we should be able to change it.<li><code class="language-plaintext highlighter-rouge">Date</code> - It is the date of the document. In this example, we’ll require the exact date and time to be set automatically by the system itself, not as an input by the user. Additionally, instead of directly setting the date, we’ll accept a given service that can provide the required information. This will enable us to mock the service and write better unit tests.<li><code class="language-plaintext highlighter-rouge">Customer</code> information - We’d like to group all customer information in a separate construct, and we’ll use a value object for that purpose. The customer information should be provided while we create the order. No changes should be allowed, otherwise, that would represent a completely different order.<li><code class="language-plaintext highlighter-rouge">Address</code> information - We might group the address information in a separate value object too. It is required information to create an order, but the customer can change their mind and update the desired shipping address.<li><code class="language-plaintext highlighter-rouge">GrandTotal</code> - It’s the sum of the prices of the items in the order. The amount should be automatically updated as we add or delete items from the order.<li><code class="language-plaintext highlighter-rouge">OrderItems</code> - It’s a list of items in the current order. In this example, once we add an item, we can no longer change it, but only delete it. We also want to encapsulate the actions of adding/deleting items within the <code class="language-plaintext highlighter-rouge">Order</code> entity.</ul><p>Now that we defined our model, we can refactor the <code class="language-plaintext highlighter-rouge">Order</code> and <code class="language-plaintext highlighter-rouge">OrderItem</code> as follows.</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">Customer</span> <span class="p">:</span> <span class="n">ValueObject</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">FirstName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">LastName</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Email</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">Customer</span><span class="p">(</span><span class="kt">string</span> <span class="n">firstName</span><span class="p">,</span> <span class="kt">string</span> <span class="n">lastName</span><span class="p">,</span> <span class="kt">string</span> <span class="n">email</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">firstName</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">firstName</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">lastName</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">lastName</span><span class="p">));</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="n">FirstName</span> <span class="p">=</span> <span class="n">firstName</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">LastName</span> <span class="p">=</span> <span class="n">lastName</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Email</span> <span class="p">=</span> <span class="n">email</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">protected</span> <span class="k">override</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">&gt;</span> <span class="nf">GetAtomicValues</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">yield</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">FirstName</span><span class="p">;</span>
+        <span class="k">yield</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">LastName</span><span class="p">;</span>
+        <span class="k">yield</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">Email</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Address</span> <span class="p">:</span> <span class="n">ValueObject</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Street</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">City</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">PostalCode</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Country</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">Address</span><span class="p">(</span><span class="kt">string</span> <span class="n">street</span><span class="p">,</span> <span class="kt">string</span> <span class="n">city</span><span class="p">,</span> <span class="kt">string</span> <span class="n">postalCode</span><span class="p">,</span> <span class="kt">string</span> <span class="n">country</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">street</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">street</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">city</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">city</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">postalCode</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">postalCode</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">country</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">country</span><span class="p">));</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="n">Street</span> <span class="p">=</span> <span class="n">street</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">City</span> <span class="p">=</span> <span class="n">city</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">PostalCode</span> <span class="p">=</span> <span class="n">postalCode</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Country</span> <span class="p">=</span> <span class="n">country</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">protected</span> <span class="k">override</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="kt">object</span><span class="p">&gt;</span> <span class="nf">GetAtomicValues</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">yield</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">Street</span><span class="p">;</span>
+        <span class="k">yield</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">City</span><span class="p">;</span>
+        <span class="k">yield</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">PostalCode</span><span class="p">;</span>
+        <span class="k">yield</span> <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="n">Country</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">OrderItem</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">Price</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">OrderItem</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="kt">decimal</span> <span class="n">price</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">name</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">name</span><span class="p">));</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="n">Name</span> <span class="p">=</span> <span class="n">name</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Price</span> <span class="p">=</span> <span class="n">price</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Order</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">OrderNo</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">DateTime</span> <span class="n">Date</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">Customer</span> <span class="n">Customer</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">Address</span> <span class="n">Address</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">GrandTotal</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;</span> <span class="n">_orderItems</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;();</span>
+    <span class="k">public</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;</span> <span class="n">OrderItems</span> <span class="p">=&gt;</span> <span class="n">_orderItems</span><span class="p">.</span><span class="nf">AsEnumerable</span><span class="p">();</span> 
+
+    <span class="k">public</span> <span class="nf">Order</span><span class="p">(</span><span class="n">IDateTime</span> <span class="n">dateTimeService</span><span class="p">,</span> <span class="kt">string</span> <span class="n">orderNo</span><span class="p">,</span> <span class="n">Customer</span> <span class="n">customer</span><span class="p">,</span> <span class="n">Address</span> <span class="n">address</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">dateTimeService</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">dateTimeService</span><span class="p">));</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">customer</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">customer</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">orderNo</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">orderNo</span><span class="p">));</span>
+
+        <span class="c1">//this.Id = if we decide to use DB generated value no action required.</span>
+        
+        <span class="k">this</span><span class="p">.</span><span class="n">OrderNo</span> <span class="p">=</span> <span class="n">orderNo</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Date</span> <span class="p">=</span> <span class="n">dateTimeService</span><span class="p">.</span><span class="n">Now</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Customer</span> <span class="p">=</span> <span class="n">customer</span><span class="p">;</span>
+
+        <span class="nf">UpdateAddress</span><span class="p">(</span><span class="n">address</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">UpdateAddress</span><span class="p">(</span><span class="n">Address</span> <span class="n">address</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">address</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">address</span><span class="p">));</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">Address</span> <span class="k">is</span> <span class="k">null</span> <span class="p">||</span> <span class="p">!</span><span class="k">this</span><span class="p">.</span><span class="n">Address</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="n">address</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="n">Address</span> <span class="p">=</span> <span class="n">address</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">OrderItem</span> <span class="nf">AddItem</span><span class="p">(</span><span class="n">OrderItem</span> <span class="n">orderItem</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">orderItem</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">orderItem</span><span class="p">));</span>
+
+        <span class="n">_orderItems</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">orderItem</span><span class="p">);</span>
+
+        <span class="nf">CalculateGrandTotal</span><span class="p">();</span>
+
+        <span class="k">return</span> <span class="n">orderItem</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">DeleteOrderItem</span><span class="p">(</span><span class="kt">int</span> <span class="n">orderItemId</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">orderItem</span> <span class="p">=</span> <span class="n">OrderItems</span><span class="p">.</span><span class="nf">FirstOrDefault</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="n">orderItemId</span><span class="p">);</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">orderItem</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">KeyNotFoundException</span><span class="p">(</span><span class="s">$"The order item with Id: </span><span class="p">{</span><span class="n">orderItemId</span><span class="p">}</span><span class="s"> is not found!"</span><span class="p">);</span>
+
+        <span class="n">_orderItems</span><span class="p">.</span><span class="nf">Remove</span><span class="p">(</span><span class="n">orderItem</span><span class="p">);</span>
+
+        <span class="nf">CalculateGrandTotal</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">private</span> <span class="k">void</span> <span class="nf">CalculateGrandTotal</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">GrandTotal</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">OrderItems</span><span class="p">.</span><span class="nf">Sum</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Price</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>We captured all the rules and modeled the entities accordingly. As you can notice, some of the properties do not expose even private setters. There is no reason for those properties to change within or out of the boundaries of the class. It’s important to emphasize that the compiler will generate readonly shadow backing fields for these properties, so they are purely immutable. We also defined the <code class="language-plaintext highlighter-rouge">OrderItem</code>, <code class="language-plaintext highlighter-rouge">Customer</code>, and <code class="language-plaintext highlighter-rouge">Address</code> objects as fully immutable.</p><h2 id="ef-core-configuration">EF Core configuration</h2><p>Now that we have properly designed our domain model, the question is how to persist them in this form. As the encapsulation is concerned, <code class="language-plaintext highlighter-rouge">EntityFramework Core</code> has great support. If configured, it can work directly with private backing fields allowing better control of what we publicly expose. We can even define automatic properties, and as long they expose at least private setters, <code class="language-plaintext highlighter-rouge">EF Core</code> can automatically work with the private shadow fields. This usage is quite common and works quite well. But, it’s a less known fact that <code class="language-plaintext highlighter-rouge">EF Core</code> can do much better and utilize even constructors while creating instances of the given entities. By leveraging this feature, we can design purely immutable entities. Before defining the configuration, I’d like to emphasize few topics which can save you in the troubleshooting process.</p><ul><li>EF by default excludes/ignores all the properties with getters only. It assumes they are calculated properties. For those properties, we should explicitly configure EF to include them in the model.<li>If we have included readonly properties in the model, EF will require a constructor (it may be marked as private) with matching parameters for these properties. You must have a constructor which accepts parameters only for these properties, not including the mutable ones.<li>The constructor parameters should be named exactly as the properties. Excluding the first character, the naming is case-sensitive. For a given <code class="language-plaintext highlighter-rouge">FirstName</code> property, you may define the parameter as <code class="language-plaintext highlighter-rouge">FirstName</code> or <code class="language-plaintext highlighter-rouge">firstName</code>, but not as <code class="language-plaintext highlighter-rouge">firstname</code>. This is a common mistake.<li>If you have defined immutable owned types (e.g., value objects) as part of the entity, you might be compelled to add them as constructor parameters. Doing so will be an incorrect configuration, and you’ll face runtime exceptions. <code class="language-plaintext highlighter-rouge">EF Core</code> creates instances of these objects separately and has a different internal mechanism of mapping these objects to the entity.</ul><p>Finally, the entities will have the following form (<code class="language-plaintext highlighter-rouge">Customer</code> and <code class="language-plaintext highlighter-rouge">Address</code> value objects remain unchanged):</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">OrderItem</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">Price</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">OrderId</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+
+    <span class="k">private</span> <span class="nf">OrderItem</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">,</span> <span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="kt">decimal</span> <span class="n">price</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderId</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Id</span> <span class="p">=</span> <span class="n">id</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Name</span> <span class="p">=</span> <span class="n">name</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Price</span> <span class="p">=</span> <span class="n">price</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">OrderId</span> <span class="p">=</span> <span class="n">orderId</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">OrderItem</span><span class="p">(</span><span class="kt">string</span> <span class="n">name</span><span class="p">,</span> <span class="kt">decimal</span> <span class="n">price</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">name</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">name</span><span class="p">));</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="n">Name</span> <span class="p">=</span> <span class="n">name</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Price</span> <span class="p">=</span> <span class="n">price</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">Order</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="kt">int</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">OrderNo</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">DateTime</span> <span class="n">Date</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">Customer</span> <span class="n">Customer</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="n">Address</span> <span class="n">Address</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">public</span> <span class="kt">decimal</span> <span class="n">GrandTotal</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">private</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+
+
+    <span class="k">private</span> <span class="k">readonly</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;</span> <span class="n">_orderItems</span> <span class="p">=</span> <span class="k">new</span> <span class="n">List</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;();</span>
+    <span class="k">public</span> <span class="n">IEnumerable</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;</span> <span class="n">OrderItems</span> <span class="p">=&gt;</span> <span class="n">_orderItems</span><span class="p">.</span><span class="nf">AsEnumerable</span><span class="p">();</span>
+
+        
+    <span class="c1">// Just to demostrate calculated properties.</span>
+    <span class="k">public</span> <span class="kt">string</span> <span class="n">GrandTotalNormalized</span> <span class="p">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="n">GrandTotal</span><span class="p">.</span><span class="nf">ToString</span><span class="p">(</span><span class="s">"n2"</span><span class="p">);</span>
+
+        
+    <span class="k">private</span> <span class="nf">Order</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">,</span> <span class="kt">string</span> <span class="n">orderNo</span><span class="p">,</span> <span class="n">DateTime</span> <span class="n">date</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Id</span> <span class="p">=</span> <span class="n">id</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">OrderNo</span> <span class="p">=</span> <span class="n">orderNo</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Date</span> <span class="p">=</span> <span class="n">date</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="nf">Order</span><span class="p">(</span><span class="n">IDateTime</span> <span class="n">dateTimeService</span><span class="p">,</span> <span class="kt">string</span> <span class="n">orderNo</span><span class="p">,</span> <span class="n">Customer</span> <span class="n">customer</span><span class="p">,</span> <span class="n">Address</span> <span class="n">address</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">dateTimeService</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">dateTimeService</span><span class="p">));</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">customer</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">customer</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="kt">string</span><span class="p">.</span><span class="nf">IsNullOrEmpty</span><span class="p">(</span><span class="n">orderNo</span><span class="p">))</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">orderNo</span><span class="p">));</span>
+
+        <span class="c1">//this.Id = if we decide to use DB generated value no action required.</span>
+            
+        <span class="k">this</span><span class="p">.</span><span class="n">OrderNo</span> <span class="p">=</span> <span class="n">orderNo</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Date</span> <span class="p">=</span> <span class="n">dateTimeService</span><span class="p">.</span><span class="n">Now</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">Customer</span> <span class="p">=</span> <span class="n">customer</span><span class="p">;</span>
+
+        <span class="nf">UpdateAddress</span><span class="p">(</span><span class="n">address</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">/// It's important not to update the Address if there are no changes.</span>
+    <span class="c1">/// If updated, since it's a new object, EF tracker will mark it as New.</span>
+    <span class="c1">/// This can have implications on "Auditing" logic, if you have implemented one. </span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">UpdateAddress</span><span class="p">(</span><span class="n">Address</span> <span class="n">address</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">address</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">address</span><span class="p">));</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="n">Address</span> <span class="k">is</span> <span class="k">null</span> <span class="p">||</span> <span class="p">!</span><span class="k">this</span><span class="p">.</span><span class="n">Address</span><span class="p">.</span><span class="nf">Equals</span><span class="p">(</span><span class="n">address</span><span class="p">))</span>
+        <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="n">Address</span> <span class="p">=</span> <span class="n">address</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="n">OrderItem</span> <span class="nf">AddItem</span><span class="p">(</span><span class="n">OrderItem</span> <span class="n">orderItem</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">orderItem</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">ArgumentNullException</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">orderItem</span><span class="p">));</span>
+
+        <span class="n">_orderItems</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="n">orderItem</span><span class="p">);</span>
+
+        <span class="nf">CalculateGrandTotal</span><span class="p">();</span>
+
+        <span class="k">return</span> <span class="n">orderItem</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">DeleteOrderItem</span><span class="p">(</span><span class="kt">int</span> <span class="n">orderItemId</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">var</span> <span class="n">orderItem</span> <span class="p">=</span> <span class="n">OrderItems</span><span class="p">.</span><span class="nf">FirstOrDefault</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Id</span> <span class="p">==</span> <span class="n">orderItemId</span><span class="p">);</span>
+        <span class="n">_</span> <span class="p">=</span> <span class="n">orderItem</span> <span class="p">??</span> <span class="k">throw</span> <span class="k">new</span> <span class="nf">KeyNotFoundException</span><span class="p">(</span><span class="s">$"The order item with Id: </span><span class="p">{</span><span class="n">orderItemId</span><span class="p">}</span><span class="s"> is not found!"</span><span class="p">);</span>
+
+        <span class="n">_orderItems</span><span class="p">.</span><span class="nf">Remove</span><span class="p">(</span><span class="n">orderItem</span><span class="p">);</span>
+
+        <span class="nf">CalculateGrandTotal</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="k">private</span> <span class="k">void</span> <span class="nf">CalculateGrandTotal</span><span class="p">()</span>
+    <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="n">GrandTotal</span> <span class="p">=</span> <span class="k">this</span><span class="p">.</span><span class="n">OrderItems</span><span class="p">.</span><span class="nf">Sum</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Price</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>The required EF configuration for these entities is as following</p><div class="language-c# highlighter-rouge"><div class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+</pre><td class="rouge-code"><pre><span class="k">public</span> <span class="k">class</span> <span class="nc">OrderItemConfiguration</span> <span class="p">:</span> <span class="n">IEntityTypeConfiguration</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">Configure</span><span class="p">(</span><span class="n">EntityTypeBuilder</span><span class="p">&lt;</span><span class="n">OrderItem</span><span class="p">&gt;</span> <span class="n">builder</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">builder</span><span class="p">.</span><span class="nf">ToTable</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">OrderItem</span><span class="p">));</span>
+
+        <span class="n">builder</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Name</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">100</span><span class="p">);</span>
+        <span class="n">builder</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Price</span><span class="p">).</span><span class="nf">HasPrecision</span><span class="p">(</span><span class="m">18</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span>
+
+        <span class="c1">// Even though we're not configuring anything specific for OrderId property,</span>
+        <span class="c1">// it's crucial to write the following line, and let the EF know that we want to include this property.</span>
+        <span class="c1">// EF by default, excludes all properties with getters only. It assumes they are calculated properties.</span>
+        <span class="n">builder</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">OrderId</span><span class="p">);</span>
+
+        <span class="n">builder</span><span class="p">.</span><span class="nf">HasKey</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">public</span> <span class="k">class</span> <span class="nc">OrderConfiguration</span> <span class="p">:</span> <span class="n">IEntityTypeConfiguration</span><span class="p">&lt;</span><span class="n">Order</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="k">public</span> <span class="k">void</span> <span class="nf">Configure</span><span class="p">(</span><span class="n">EntityTypeBuilder</span><span class="p">&lt;</span><span class="n">Order</span><span class="p">&gt;</span> <span class="n">builder</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">builder</span><span class="p">.</span><span class="nf">ToTable</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">Order</span><span class="p">));</span>
+
+        <span class="c1">// Even though we're not configuring anything specific for Date property,</span>
+        <span class="c1">// it's crucial to write the following line, and let the EF know that we want to include this property.</span>
+        <span class="c1">// EF by default, excludes all properties with getters only. It assumes they are calculated properties.</span>
+        <span class="n">builder</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Date</span><span class="p">);</span>
+
+
+        <span class="n">builder</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">OrderNo</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">10</span><span class="p">);</span>
+        <span class="n">builder</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">GrandTotal</span><span class="p">).</span><span class="nf">HasPrecision</span><span class="p">(</span><span class="m">18</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span>
+
+        <span class="n">builder</span><span class="p">.</span><span class="nf">OwnsOne</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Customer</span><span class="p">,</span> <span class="n">o</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="n">o</span><span class="p">.</span><span class="nf">WithOwner</span><span class="p">();</span>
+
+            <span class="n">o</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">FirstName</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">100</span><span class="p">);</span>
+            <span class="n">o</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">LastName</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">100</span><span class="p">);</span>
+            <span class="n">o</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Email</span><span class="p">).</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">100</span><span class="p">);</span>
+        <span class="p">});</span>
+
+        <span class="n">builder</span><span class="p">.</span><span class="nf">OwnsOne</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">o</span> <span class="p">=&gt;</span>
+        <span class="p">{</span>
+            <span class="n">o</span><span class="p">.</span><span class="nf">WithOwner</span><span class="p">();</span>
+
+            <span class="n">o</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Street</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">250</span><span class="p">);</span>
+            <span class="n">o</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">City</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">100</span><span class="p">);</span>
+            <span class="n">o</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">PostalCode</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">10</span><span class="p">);</span>
+            <span class="n">o</span><span class="p">.</span><span class="nf">Property</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Country</span><span class="p">).</span><span class="nf">IsRequired</span><span class="p">().</span><span class="nf">HasMaxLength</span><span class="p">(</span><span class="m">100</span><span class="p">);</span>
+        <span class="p">});</span>
+
+        <span class="n">builder</span><span class="p">.</span><span class="n">Metadata</span><span class="p">.</span><span class="nf">FindNavigation</span><span class="p">(</span><span class="k">nameof</span><span class="p">(</span><span class="n">Order</span><span class="p">.</span><span class="n">OrderItems</span><span class="p">))</span>
+                <span class="p">.</span><span class="nf">SetPropertyAccessMode</span><span class="p">(</span><span class="n">PropertyAccessMode</span><span class="p">.</span><span class="n">Field</span><span class="p">);</span>
+
+        <span class="n">builder</span><span class="p">.</span><span class="nf">HasKey</span><span class="p">(</span><span class="n">x</span> <span class="p">=&gt;</span> <span class="n">x</span><span class="p">.</span><span class="n">Id</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></table></code></div></div><p>Once you have this in place, <code class="language-plaintext highlighter-rouge">EF Core</code> will be able to do its magic and your application with run smoothly. Hopefully, this article will be of help to you, and you’ll be able to improve your domain model and embrace immutability whenever is required.</p><p>You can find the full sample <a href="https://github.com/fiseni/ImmutabilitySample">here</a>.</p></div><div class="post-tail-wrapper text-muted"><div class="post-meta mb-3"> <i class="far fa-folder-open fa-fw mr-1"></i> <a href='/categories/software-development/'>Software Development</a></div><div class="post-tags"> <i class="fa fa-tags fa-fw mr-1"></i> <a href="/tags/efcore/" class="post-tag no-text-decoration" >EFCore</a> <a href="/tags/dotnetcore/" class="post-tag no-text-decoration" >dotnetcore</a></div><div class="post-tail-bottom d-flex justify-content-between align-items-center mt-3 pt-5 pb-2"><div class="license-wrapper"> This post is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> by the author.</div><div class="share-wrapper"> <span class="share-label text-muted mr-1">Share</span> <span class="share-icons"> <a href="https://twitter.com/intent/tweet?text=Immutable entities and value objects in EF Core! - Fati Iseni - Blog&url=https://fiseni.com/posts/immutable-entities-in-ef-core/" data-toggle="tooltip" data-placement="top" title="Twitter" target="_blank" rel="noopener" aria-label="Twitter"> <i class="fa-fw fab fa-twitter"></i> </a> <a href="https://www.facebook.com/sharer/sharer.php?title=Immutable entities and value objects in EF Core! - Fati Iseni - Blog&u=https://fiseni.com/posts/immutable-entities-in-ef-core/" data-toggle="tooltip" data-placement="top" title="Facebook" target="_blank" rel="noopener" aria-label="Facebook"> <i class="fa-fw fab fa-facebook-square"></i> </a> <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://fiseni.com/posts/immutable-entities-in-ef-core/" data-toggle="tooltip" data-placement="top" title="Linkedin" target="_blank" rel="noopener" aria-label="Linkedin"> <i class="fa-fw fab fa-linkedin"></i> </a> <i class="fa-fw fas fa-link small" onclick="copyLink()" data-toggle="tooltip" data-placement="top" title="Copy link"></i> </span></div></div></div></div></div><div id="panel-wrapper" class="col-xl-2 pl-2 text-muted topbar-down"><div class="access"><div id="access-lastmod" class="post"> <span>Recent Update</span><ul class="post-content pl-0 pb-1 ml-1 mt-2"><li><a href="/posts/default-item-for-entity-collections/">Default item for a given entity's collection</a><li><a href="/posts/how-to-remove-microsoft-work-school-account/">How to remove a Microsoft work/school account?</a><li><a href="/posts/what-is-the-proper-usage-of-domain-events/">What is the proper usage of domain events?</a><li><a href="/posts/immutable-entities-in-ef-core/">Immutable entities and value objects in EF Core!</a><li><a href="/posts/open-close-principle-and-runtime-di-configuration/">Open-Closed Principle and runtime DI configurations!</a></ul></div><div id="access-tags"> <span>Trending Tags</span><div class="d-flex flex-wrap mt-3 mb-1 mr-3"> <a class="post-tag" href="/tags/design-patterns/">design patterns</a> <a class="post-tag" href="/tags/dotnetcore/">dotnetcore</a> <a class="post-tag" href="/tags/software-architecture/">software architecture</a> <a class="post-tag" href="/tags/ddd/">ddd</a> <a class="post-tag" href="/tags/efcore/">EFCore</a> <a class="post-tag" href="/tags/productivity/">Productivity</a> <a class="post-tag" href="/tags/auditing/">Auditing</a> <a class="post-tag" href="/tags/azure/">azure</a> <a class="post-tag" href="/tags/cache/">cache</a> <a class="post-tag" href="/tags/dependency-injection/">dependency injection</a></div></div></div><div id="toc-wrapper" class="pl-0 pr-4 mb-5"> <span class="pl-3 pt-2 mb-2">Contents</span><nav id="toc" data-toggle="toc"></nav></div></div></div><div class="row"><div class="col-12 col-lg-11 col-xl-9"><div id="post-extend-wrapper" class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-md-4 pr-md-4"><div id="related-posts" class="mt-5 mb-2 mb-sm-4"><h3 class="pt-2 mt-1 mb-4 ml-1" data-toc-skip>Further Reading</h3><div class="card-deck mb-4"><div class="card"> <a href="/posts/how-to-implement-auditing-on-your-entities/"><div class="card-body"> <span class="timeago small" > Nov 28, 2020 <i class="unloaded">2020-11-28T17:00:00+01:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>How to implement auditing on your entities!</h3><div class="text-muted small"><p> Not rarely we require to apply some basic auditing information for our entities. Although we may configure full audit features on the Database side, sometimes it’s handy to have this information as...</p></div></div></a></div><div class="card"> <a href="/posts/open-close-principle-and-runtime-di-configuration/"><div class="card-body"> <span class="timeago small" > Dec 2, 2020 <i class="unloaded">2020-12-02T17:00:00+01:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Open-Closed Principle and runtime DI configurations!</h3><div class="text-muted small"><p> I just recently published a Nuget package that offers some extensions to the .NET Core’s built-in DI container, practically extensions to IServiceCollection. The extensions provide the ability for ...</p></div></div></a></div><div class="card"> <a href="/posts/alternative-caching-implementations-and-cache-invalidation/"><div class="card-body"> <span class="timeago small" > Dec 9, 2020 <i class="unloaded">2020-12-09T17:00:00+01:00</i> </span><h3 class="pt-0 mt-1 mb-3" data-toc-skip>Alternative caching implementations and cache invalidation!</h3><div class="text-muted small"><p> Today I’ll be talking about caching and various ways to implement the same. We’ll also show how to invalidate the cache on demand if using Entity Framework. The caching feature is almost mandatory...</p></div></div></a></div></div></div><div class="post-navigation d-flex justify-content-between"> <a href="/posts/alternative-caching-implementations-and-cache-invalidation/" class="btn btn-outline-primary"><p>Alternative caching implementations and cache invalidation!</p></a> <a href="/posts/what-is-the-proper-usage-of-domain-events/" class="btn btn-outline-primary"><p>What is the proper usage of domain events?</p></a></div><div id="disqus" class="pt-2 pb-2"><p class="font-italic text-center text-muted small"> Comments powered by <a href="https://disqus.com/">Disqus</a>.</p></div><script src="/assets/js/lib/jquery.disqusloader.min.js"></script> <script> var options = { scriptUrl: '//fiseni.disqus.com/embed.js', disqusConfig: function() { this.page.url = 'https://fiseni.com/posts/immutable-entities-in-ef-core/'; this.page.identifier = '/posts/immutable-entities-in-ef-core/'; } }; $.disqusLoader('#disqus', options); </script></div></div></div><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script> <script type="text/javascript"> const imgs = document.querySelectorAll('#post-wrapper img'); const observer = lozad(imgs); observer.observe(); </script><footer class="d-flex w-100 justify-content-center"><div class="d-flex justify-content-between align-items-center"><div class="footer-left"><p class="mb-0"> © 2021 <a href="https://twitter.com/fiseni">Fati Iseni</a>. <span data-toggle="tooltip" data-placement="top" title="Except where otherwise noted, the blog posts on this site are licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) License by the author.">Some rights reserved.</span></p></div></div></footer></div><div id="search-result-wrapper" class="d-flex justify-content-center unloaded"><div class="col-12 col-xl-11 post-content"><div id="search-hints"><h4 class="text-muted mb-4">Trending Tags</h4><a class="post-tag" href="/tags/design-patterns/">design patterns</a> <a class="post-tag" href="/tags/dotnetcore/">dotnetcore</a> <a class="post-tag" href="/tags/software-architecture/">software architecture</a> <a class="post-tag" href="/tags/ddd/">ddd</a> <a class="post-tag" href="/tags/efcore/">EFCore</a> <a class="post-tag" href="/tags/productivity/">Productivity</a> <a class="post-tag" href="/tags/auditing/">Auditing</a> <a class="post-tag" href="/tags/azure/">azure</a> <a class="post-tag" href="/tags/cache/">cache</a> <a class="post-tag" href="/tags/dependency-injection/">dependency injection</a></div><div id="search-results" class="d-flex flex-wrap justify-content-center text-muted mt-3"></div></div></div></div><div id="mask"></div><a id="back-to-top" href="#" aria-label="back-to-top" class="btn btn-lg btn-box-shadow" role="button"> <i class="fas fa-angle-up"></i> </a> <script src="https://cdn.jsdelivr.net/npm/simple-jekyll-search@1.7.3/dest/simple-jekyll-search.min.js"></script> <script> SimpleJekyllSearch({ searchInput: document.getElementById('search-input'), resultsContainer: document.getElementById('search-results'), json: '/assets/js/data/search.json', searchResultTemplate: '<div class="pl-1 pr-1 pl-sm-2 pr-sm-2 pl-lg-4 pr-lg-4 pl-xl-0 pr-xl-0"> <a href="https://fiseni.com{url}">{title}</a><div class="post-meta d-flex flex-column flex-sm-row text-muted mt-1 mb-1"><div class="mr-sm-4"><i class="far fa-folder fa-fw"></i>{categories}</div><div><i class="fa fa-tag fa-fw"></i>{tags}</div></div><p>{snippet}</p></div>', noResultsText: '<p class="mt-5">Oops! No result founds.</p>' }); </script> <script async src="https://www.googletagmanager.com/gtag/js?id=G-6N7H7NRJZ7"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-6N7H7NRJZ7'); </script>
