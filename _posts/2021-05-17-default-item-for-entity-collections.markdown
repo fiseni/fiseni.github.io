@@ -1,0 +1,288 @@
+---
+# layout: post
+# author: Fati Iseni
+title: "Default item for a given entity's collection"
+date: 2021-05-17 17:00:00 +0100
+description: How to mark an item as default for a given entity's collection.
+categories: [Software Development]
+tags: [dotnetcore, design patterns, software architecture]
+image: /assets/img/pozitron-cover.png
+pin: false
+# math: true
+# toc: true
+---
+In this post, I'll elaborate on the case when you need to mark an item as default for a given entity's collection. Let's assume we have `Customer` and `Address` entities, and each customer may have more than one address. For the sake of simplicity, we'll work with the following simple model.
+
+```c#
+public class Customer
+{
+    public int Id { get; set; }
+    public List<Address> Addresses { get; set; }
+}
+public class Address
+{
+    public int Id { get; set; }
+    public string Street { get; set; }
+    public string City { get; set; }
+}
+```
+
+Now, we have a requirement to set a default address for the given customer. I'll provide few approaches here, but in all of them, we'll be utilizing the concept of the aggregates. The customer is an aggregate root in this case, and it will be its responsibility to ensure the consistency of the aggregate as a whole. So, the customer will expose a behavior for manipulating its addresses.
+
+## Solution 1
+
+The first approach is the simplest and most straightforward one. We'll define `IsDefault` boolean property in the `Address` entity, and the `Customer` will set the flag accordingly.
+
+```c#
+public class Address
+{
+    public int Id { get; private set; }
+    public string Street { get; private set; }
+    public string City { get; private set; }
+    public bool IsDefault { get; set; } = false;
+
+    public int CustomerId { get; private set; }
+    public Customer Customer { get; private set; }
+
+    private Address() { }
+
+    public Address(string street, string city)
+    {
+        Update(street, city);
+    }
+
+    public void Update(string street, string city)
+    {
+        if (string.IsNullOrEmpty(street)) throw new ArgumentException(nameof(street));
+        if (string.IsNullOrEmpty(city)) throw new ArgumentException(nameof(city));
+
+        this.Street = street;
+        this.City = city;
+    }
+}
+
+public class Customer
+{
+    public int Id { get; private set; }
+
+    private readonly List<Address> _addresses = new List<Address>();
+    public IEnumerable<Address> Addresses => _addresses.AsEnumerable();
+
+    public void AddAddress(string street, string city, bool isDefault = false)
+    {
+        var address = new Address(street, city);
+            
+        _addresses.Add(address);
+
+        if (isDefault)
+        {
+            SetAddressAsDefault(address);
+        }
+    }
+
+    public void UpdateAddress(int id, string street, string city, bool isDefault = false)
+    {
+        var address = GetAddress(id);
+
+        address.Update(street, city);
+
+        if (isDefault)
+        {
+            SetAddressAsDefault(address);
+        }
+    }
+
+    public void DeleteAddress(int id)
+    {
+        var address = GetAddress(id);
+
+        _addresses.Remove(address);
+
+        // Depending on the requirements, if the default address is deleted, the first next one can be assigned as default.
+    }
+
+    public void SetAddressAsDefault(Address address)
+    {
+        _ = address ?? throw new ArgumentNullException(nameof(address));
+
+        _addresses.ForEach(p => p.IsDefault = false);
+        address.IsDefault = true;
+    }
+
+    private Address GetAddress(int id)
+    {
+        var address = _addresses.Find(x => x.Id == id);
+        _ = address ?? throw new KeyNotFoundException($"The address with id: {id} is not found!");
+
+        return address;
+    }
+}
+```
+
+As you may assume, there are few issues with this approach. We encapsulated the CRUD actions and we're handling the flag accordingly, but the `IsDefault` has a public setter. There is no guarantee that this state won't be mutated outside of the aggregate. Even more importantly, should the address be aware and hold information whether is default or not? It seems wrong conceptually.
+
+## Solution 2
+
+It might be better if the knowledge of which address is the default one is kept in the customer entity. Addresses will be fully agnostic to this information. If following this logic, it might be appealing to define this relation as follows.
+
+```c#
+public class Customer
+{
+    public int Id { get; private set; }
+
+    private readonly List<Address> _addresses = new List<Address>();
+    public IEnumerable<Address> Addresses => _addresses.AsEnumerable();
+
+    public Address DefaultAddress { get; set; }
+}
+```
+
+This might seem nice, but it's hard and inconvenient to persist this state. There is already 1:n relationship, and by defining an additional 1:1 relationship, we might end up in a circular dependency. We'll be forced to introduce an additional foreign key in the `Address` entity, which is not quite elegant solution.
+Instead, we can keep only the id of the default address, and define a calculated property that provides the correct address object.
+
+```c#
+public class Customer
+{
+    public int Id { get; private set; }
+
+    private readonly List<Address> _addresses = new List<Address>();
+    public IEnumerable<Address> Addresses => _addresses.AsEnumerable();
+
+    // This is not a FK.
+    public int? DefaultAddressID { get; private set; }
+    public Address DefaultAddress => Addresses.FirstOrDefault(x => x.Id == DefaultAddressID);
+
+    public void SetAddressAsDefault(Address address)
+    {
+        _ = address ?? throw new ArgumentNullException(nameof(address));
+
+        DefaultAddressID = address.Id;
+    }
+
+    // The rest of the code is same and excluded for clarity.
+```
+
+In this case, we don't have a foreign key to ensure the relationship integrity, but as long as we're not doing manual changes to the DB directly (and we should not) then it's an acceptable approach.
+
+## Solution 3
+
+The last option introduces data duplication, but it's a quite appealing approach. We can keep the default address as an owned type in our entity. It means we'll have additional columns in our Customer table for persisting the default address. At first glance, it may seem weird, but it offers few advantages
+- In cases where you don't need all addresses, you won't have a JOIN operation
+- If you usually need the address when retrieving the customer, it's handy to have it as an owned type. 
+
+This will be the implementation, where `Address` is a value object and `CustomerAddress` is the related entity.
+
+```c#
+public class Address : ValueObject
+{
+    public string Street { get; private set; }
+    public string City { get; private set; }
+
+    private Address() { }
+
+    public Address(string street, string city)
+    {
+        if (string.IsNullOrEmpty(street)) throw new ArgumentException(nameof(street));
+        if (string.IsNullOrEmpty(city)) throw new ArgumentException(nameof(city));
+
+        this.Street = street;
+        this.City = city;
+    }
+
+    protected override IEnumerable<object> GetAtomicValues()
+    {
+        yield return Street;
+        yield return City;
+    }
+}
+
+public class CustomerAddress
+{
+    public int Id { get; private set; }
+    public Address Details { get; private set; }
+
+    public int CustomerId { get; private set; }
+    public Customer Customer { get; private set; }
+
+    private CustomerAddress() { }
+
+    public CustomerAddress(Address details)
+    {
+        Update(details);
+    }
+
+    public void Update(Address details)
+    {
+        _ = details ?? throw new ArgumentNullException(nameof(details));
+
+        if (Details is null || !Details.Equals(details))
+        {
+            Details = details;
+        }
+    }
+}
+
+public class Customer
+{
+    public int Id { get; private set; }
+
+    private readonly List<CustomerAddress> _addresses = new List<CustomerAddress>();
+    public IEnumerable<CustomerAddress> Addresses => _addresses.AsEnumerable();
+
+    // This is owned type, not a navigation.
+    public Address DefaultAddress { get; private set; }
+
+    public void AddAddress(Address address, bool isDefault = false)
+    {
+        _ = address ?? throw new ArgumentNullException(nameof(address));
+
+        _addresses.Add(new CustomerAddress(address));
+
+        if (isDefault)
+        {
+            SetAddressAsDefault(address);
+        }
+    }
+
+    public void UpdateAddress(int id, Address address, bool isDefault = false)
+    {
+        _ = address ?? throw new ArgumentNullException(nameof(address));
+            
+        var customerAddress = GetAddress(id);
+
+        customerAddress.Update(address);
+
+        if (isDefault)
+        {
+            SetAddressAsDefault(address);
+        }
+    }
+
+    public void DeleteAddress(int id)
+    {
+        var customerAddress = GetAddress(id);
+
+        _addresses.Remove(customerAddress);
+
+        // Depending on the requirements, if the default address is deleted, the first next one can be assigned as default.
+    }
+
+    public void SetAddressAsDefault(Address address)
+    {
+        _ = address ?? throw new ArgumentNullException(nameof(address));
+
+        if (DefaultAddress is null || !DefaultAddress.Equals(address))
+        {
+            DefaultAddress = address;
+        }
+    }
+
+    private CustomerAddress GetAddress(int id)
+    {
+        var customerAddress = _addresses.Find(x => x.Id == id);
+        _ = customerAddress ?? throw new KeyNotFoundException($"The address with id: {id} is not found!");
+
+        return customerAddress;
+    }
+}
+```
