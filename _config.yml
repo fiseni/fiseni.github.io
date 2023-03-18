@@ -1,99 +1,130 @@
-# The Site Settings
-# v2.0
-# https://github.com/cotes2020/jekyll-theme-chirpy
-# © 2017-2019 Cotes Chung
-# MIT licensed
+# The Site Configuration
 
+# Import the theme
+theme: jekyll-theme-chirpy
 
-# jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
-#--------------------------
+# Change the following value to '/PROJECT_NAME' ONLY IF your site type is GitHub Pages Project sites
+# and doesn't have a custom domain.
+baseurl: ""
 
-title: Fati Iseni - Blog                            # Title of the site
-
-tagline: Software Architect                         # it will display as the sub-title
-
-description: >-                                     # used by seo meta and the atom feed
-  Fati Iseni 's blog on technology and software development.
-
-# Replace with the website url, e.g. 'https://username.github.io'
-url: 'https://fiseni.com'
-
-author:
-  name: Fati Iseni
-  twitter: fiseni
-
-avatar: /assets/img/fati-iseni.jpg                  # support internet resources
-
-github:
-  username: fiseni                                  # change to your github username
-
-twitter:
-  username: fiseni                                  # change to your twitter username
-
-social:
-  name: Fati Iseni                                  # it will shows as the copyright owner in Footer
-  email: fati.iseni@pozitrongroup.com               # change to your email address
-  links:
-    # The first element serves as the copyright owner's link
-    - https://twitter.com/fiseni      # change to your twitter homepage
-    - https://github.com/fiseni       # change to your github homepage
-    - https://www.linkedin.com/in/fati-iseni-193928127
-    # Uncomment below to add more social links
-    # - https://www.facebook.com/username
-
-google_site_verification: p9Rvv10SRN6FJ9f7Vbg7Pnrts_Y9_nDh4zVdFcfx7Ls # change to your verification string
-
-#--------------------------
-
-
-# Only if your site type is GitHub Project sites and doesn't have a custom domain,
-# change below value to '/projectname'.
-baseurl: ''
+# The language of the webpage › http://www.lingoes.net/en/translator/langcode.htm
+# If it has the same name as one of the files in folder `_data/locales`, the layout language will also be changed,
+# otherwise, the layout language will use the default value of 'en'.
+lang: en
 
 # Change to your timezone › http://www.timezoneconverter.com/cgi-bin/findzone/findzone
 timezone: Europe/Berlin
 
+# jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
+# ↓ --------------------------
+
+title: Fati Iseni - Blog # the main title
+
+tagline: Software Architect # it will display as the sub-title
+
+description: >- # used by seo meta and the atom feed
+  Fati Iseni's blog on technology and software development.
+
+# fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
+url: "https://fiseni.com"
+
+github:
+  username: fiseni # change to your github username
+
+twitter:
+  username: fiseni # change to your twitter username
+
+social:
+  # Change to your full name.
+  # It will be displayed as the default author of the posts and the copyright owner in the Footer
+  name: Fati Iseni
+  email: fati.iseni@pozitrongroup.com # change to your email address
+  links:
+    # The first element serves as the copyright owner's link
+    - https://twitter.com/fiseni # change to your twitter homepage
+    - https://github.com/fiseni # change to your github homepage
+    - https://www.linkedin.com/in/fati-iseni-193928127
+    # Uncomment below to add more social links
+    # - https://www.facebook.com/username
+    # - https://www.linkedin.com/in/username
+
+google_site_verification: p9Rvv10SRN6FJ9f7Vbg7Pnrts_Y9_nDh4zVdFcfx7Ls # change to your verification string
+
+# ↑ --------------------------
+# The end of `jekyll-seo-tag` settings
+
 google_analytics:
   id: 'G-6N7H7NRJZ7'          # Fill with your Google Analytics ID
+  # Google Analytics pageviews report settings
   pv:
-    # The Google Analytics pageviews switch.
-    # DO NOT enable it unless you know how to deploy the Google Analytics superProxy.
-    enabled: false
-    # the next options only valid when `google_analytics.pv` is enabled.
-    proxy_url: ''
-    proxy_endpoint: ''
-    cache: false            # pv data local cache, good for the users from GFW area.
+    proxy_endpoint: # fill in the Google Analytics superProxy endpoint of Google App Engine
+    cache_path: # the local PV cache data, friendly to visitors from GFW region
 
-disqus:
-  comments: true            # boolean type, the global switch for posts comments.
-  shortname: 'fiseni'       # Fill with your Disqus shortname. › https://help.disqus.com/en/articles/1717111-what-s-a-shortname
-
-
-# Prefer color scheme setting, available values:
+# Prefer color scheme setting.
 #
-#     dual   - Follow the system prefer color by default, and a toggle will display
-#              in the left bottom of Sidebar, which used for switch the theme between dark and light.
+# Note: Keep empty will follow the system prefer color by default,
+# and there will be a toggle to switch the theme between dark and light
+# on the bottom left of the sidebar.
+#
+# Available options:
 #
 #     light  - Use the light color scheme
-#
 #     dark   - Use the dark color scheme
 #
-theme_mode: dual
+theme_mode: # [light|dark]
 
-# boolean type, global switch for ToC in posts.
+# The CDN endpoint for images.
+# Notice that once it is assigned, the CDN url
+# will be added to all image (site avatar & posts' images) paths starting with '/'
+#
+# e.g. 'https://cdn.com'
+img_cdn:
+
+# the avatar on sidebar, support local or CORS resources
+avatar: /assets/img/fati-iseni.jpg
+
+# boolean type, the global switch for TOC in posts.
 toc: true
+
+comments:
+  active: # The global switch for posts comments, e.g., 'disqus'.  Keep it empty means disable
+  # The active options are as follows:
+  disqus:
+    shortname: 'fiseni'       # Fill with your Disqus shortname. › https://help.disqus.com/en/articles/1717111-what-s-a-shortname
+  # utterances settings › https://utteranc.es/
+  utterances:
+    repo: # <gh-username>/<repo>
+    issue_term: # < url | pathname | title | ...>
+  # Giscus options › https://giscus.app
+  giscus:
+    repo: # <gh-username>/<repo>
+    repo_id:
+    category:
+    category_id:
+    mapping: # optional, default to 'pathname'
+    input_position: # optional, default to 'bottom'
+    lang: # optional, default to the value of `site.lang`
+    reactions_enabled: # optional, default to the value of `1`
+
+# Self-hosted static assets, optional › https://github.com/cotes2020/chirpy-static-assets
+assets:
+  self_host:
+    enabled: # boolean, keep empty means false
+    # specify the Jekyll environment, empty means both
+    # only works if `assets.self_host.enabled` is 'true'
+    env: # [development|production]
+
+pwa:
+  enabled: true # the option for PWA feature
 
 paginate: 10
 
-markdown: kramdown
-
-highlighter: rouge
+# ------------ The following options are not recommended to be modified ------------------
 
 kramdown:
-  input: GFM
   syntax_highlighter: rouge
   syntax_highlighter_opts: # Rouge Options › https://github.com/jneen/rouge#full-options
-    css_class: 'highlight'
+    css_class: highlight
     # default_lang: console
     span:
       line_numbers: false
@@ -101,73 +132,42 @@ kramdown:
       line_numbers: true
       start_line: 1
 
-# DO NOT change this unless you're a Pro user on Jekyll and Web development,
-# or you think you're smart enough to change other relevant URLs within this template.
-permalink: /posts/:title/
+collections:
+  tabs:
+    output: true
+    sort_by: order
 
 defaults:
   - scope:
-      path: ""
-    values:
-      image: /assets/images/pozitron-cover.png
-  -
-    scope:
-      path: ""          # An empty string here means all files in the project
+      path: "" # An empty string here means all files in the project
       type: posts
     values:
       layout: post
-      comments: true    # Enable comments in posts.
-      toc: true         # Display TOC column in posts.
-      location: Post
-      breadcrumb:
-        -
-          label: Posts
-          url: /
-  -
-    scope:
+      comments: true # Enable comments in posts.
+      toc: true # Display TOC column in posts.
+      # DO NOT modify the following parameter unless you are confident enough
+      # to update the code of all other post links in this project.
+      permalink: /posts/:title/
+  - scope:
       path: _drafts
     values:
       comments: false
-  -
-    scope:
-      path: tags
-    values:
-      tab_active: Tags
-      location: Tag
-      breadcrumb:
-        -
-          label: Home
-          url: /
-        -
-          label: Tags
-          url: /tabs/tags/
-  -
-    scope:
-      path: categories
-    values:
-      tab_active: Categories
-      location: Category
-      breadcrumb:
-        -
-          label: Home
-          url: /
-        -
-          label: Categories
-          url: /tabs/categories/
-  -
-    scope:
-      path: tabs
+  - scope:
+      path: ""
+      type: tabs # see `site.collections`
     values:
       layout: page
-      dynamic_title: true    # Hide title in mobile screens.
-      breadcrumb:
-        -
-          label: Home
-          url: /
-
+      permalink: /:title/
+  - scope:
+      path: assets/img/favicons
+    values:
+      swcache: true
+  - scope:
+      path: assets/js/dist
+    values:
+      swcache: true
 
 sass:
-  sass_dir: /assets/css
   style: compressed
 
 compress_html:
@@ -177,32 +177,24 @@ compress_html:
   profile: false
   blanklines: false
   ignore:
-    envs: []
+    envs: [development]
 
 exclude:
-  - vendor        # Avoid Jekyll mistakenly read the vendor directory on Travis-CI's VM .
-  - Gemfile.lock
-  - Gemfile
+  - "*.gem"
+  - "*.gemspec"
   - tools
-  - docs
   - README.md
+  - CHANGELOG.md
   - LICENSE
+  - rollup.config.js
   - node_modules
-  - gulpfile.js
-  - package.json
-  - yarn.lock
+  - package*.json
 
-sitemap_exclude:  # Sitemap will exclude the following items.
-  fuzzy:
-    - /assets/
-  accurate:
-    - /norobots/
-    - /tabs/
-    - /categories/
-    - /tags/
-    - /posts/
-    - 404.html
-    - feed.xml
-    - sitemap.xml
-    - robots.txt
-    - redirects.json
+jekyll-archives:
+  enabled: [categories, tags]
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+    category: /categories/:name/
