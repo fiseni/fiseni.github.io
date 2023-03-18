@@ -56,13 +56,6 @@ jobs:
         run: |
           bundle install --local
 
-      - name: Check baseurl
-        run: |
-          baseurl="$(grep '^baseurl:' _config.yml | yq r - baseurl)"
-          if [[ -n $baseurl ]]; then
-            echo "SPEC_TEST=_site_no_baseurl" >> $GITHUB_ENV
-          fi
-
       - name: Build Site
         run: |
           bash tools/build.sh
