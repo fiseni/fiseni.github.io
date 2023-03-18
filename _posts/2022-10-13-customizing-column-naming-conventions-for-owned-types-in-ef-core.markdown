@@ -44,7 +44,7 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 
 For the above model and corresponding configuration, the generated SQL statement is as follows.
 
-```
+```sql
 CREATE TABLE [Customers] (
   [Id] int NOT NULL IDENTITY,
   [Name] nvarchar(max) NULL,

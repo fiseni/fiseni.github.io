@@ -13,7 +13,7 @@ pin: false
 ---
 When dealing with data that changes over time, you may want to keep track of historical changes. Temporal tables in SQL Server offer an excellent solution to this problem, allowing you to automatically track changes to your data. With temporal tables, you can see what your data looked like at any point in time, making it easier to debug issues and track changes over time. Starting with Entity Framework Core 6, the team added support for this feature. In this blog post, we will discuss how to create an extension method for EF Core that automatically configures temporal tables for all entities of interest.
 
-##Configuring temporal tables for simple entities
+## Configuring temporal tables for simple entities
 
 The required configuration is quite straightforward. Let's assume we have the following model/entity.
 
@@ -48,7 +48,7 @@ EXEC(N'CREATE TABLE [Customers] (
 ) WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [' + @historyTableSchema + N'].[CustomersHistory]))');
 ```
 
-##Configuring temporal tables for entities with owned entity types
+## Configuring temporal tables for entities with owned entity types
 
 In EF Core 6 we lacked support for this feature if the entity has defined owned types mapped to the same table. This was added in EF Core 7. But, configuring them is not intuitive nor simple. Let's assume we have the following model now
 
@@ -69,7 +69,7 @@ public class Customer
 
 We assume that the configuration might be as follows
 
-```
+```csharp
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
     modelBuilder.Entity<Customer>().ToTable(x => x.IsTemporal());
@@ -122,7 +122,7 @@ EXEC(N'CREATE TABLE [Customers] (
 ) WITH (SYSTEM_VERSIONING = ON (HISTORY_TABLE = [' + @historyTableSchema + N'].[CustomersHistory]))');
 ```
 
-##Applying temporal table configuration globally
+## Applying temporal table configuration globally
 
 As shown above, the configuration is a bit overwhelming. Doing it for all your entities is a tedious task. Luckily, we can extend the `ModelBuilder` capabilities and write an extension method that does this automatically for all entities. Ideally, we'd like to to end up with the following configuration.
 
