@@ -58,12 +58,7 @@ jobs:
 
       - name: Build Site
         run: |
-          bash tools/build.sh
-
-          if [[ -n $SPEC_TEST ]]; then
-            # Bypass the defects of htmlproofer
-            bash tools/build.sh -b "" -d "$SPEC_TEST"
-          fi          
+          bash tools/build.sh     
 
       - name: Test Site
         run: |
