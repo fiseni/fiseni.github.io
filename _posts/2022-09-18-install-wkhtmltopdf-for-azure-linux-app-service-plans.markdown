@@ -18,7 +18,7 @@ While the `wkhtmltopdf` package is conveniently included in Windows plans by def
 1. Login to Azure Portal
 2. Select your App Service instance. Choose the SSH menu and then open the SSH console.
 
-![Image1](/assets/img/posts/wkhtmltopdf/image1.png)
+![Image1](/assets/img/posts/wkhtmltopdf/image-1.png)
 
 3. Create two files, `install-tools.sh` and `startup.sh`, under the `/home/site/wwwroot/` directory. Follow the steps from the screenshot below:
   - install-tools.sh
@@ -31,16 +31,16 @@ While the `wkhtmltopdf` package is conveniently included in Windows plans by def
   sh /home/site/wwwroot/install-tools.sh &
   dotnet DemoApp.dll
   ```
-![Image2](/assets/img/posts/wkhtmltopdf/image2.png)
+![Image2](/assets/img/posts/wkhtmltopdf/image-2.png)
 
 4. Go to your App Service instance again. Choose the `Configuration` menu, the `General settings` sub-menu, and update the startup command to `./startup.sh`. Save the changes.
 
-![Image3](/assets/img/posts/wkhtmltopdf/image3.png)
+![Image3](/assets/img/posts/wkhtmltopdf/image-3.png)
 
 5. In the Overview section of the same page, stop and start the service.
 6. Your application should be up and running immediately.
 7. After some time (it may take a couple of minutes), connect to the SSH console again and check whether the tool is available.
 
-![Image4](/assets/img/posts/wkhtmltopdf/image4.png)
+![Image4](/assets/img/posts/wkhtmltopdf/image-4.png)
 
 I hope you found this article useful. Happy coding!
