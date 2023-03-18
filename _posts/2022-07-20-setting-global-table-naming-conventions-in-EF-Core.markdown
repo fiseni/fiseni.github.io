@@ -1,0 +1,63 @@
+---
+# layout: post
+# author: Fati Iseni
+title: "Setting Global Table Naming Conventions in EF Core"
+date: 2022-07-20 12:00:00 +0100
+description: Learn how to set up a custom global table naming convention in Entity Framework Core, allowing you to define default table names based on entity names and override them as needed.
+categories: [Blogging, Tutorial, Software Development]
+tags: [EFCore]
+image: /assets/img/pozitron-cover.png
+pin: false
+# math: true
+# toc: true
+---
+I was recently asked about configuring a default convention in EF Core so that the generated table names use the entity names. Additionally, if a table name is set explicitly for a given entity (through the ToTable() method in entity configuration), it should override the convention. Initially, I thought this would be quite easy to accomplish. However, it proved to be a bit trickier than I anticipated. The default convention for table names in EF Core (at the time of writing, version 6) is as follows:
+
+- If the name of the table is set explicitly in the configuration for a given entity, use that name.
+- If the entity is exposed as a DbSet collection, use the name of the DbSet property.
+- If none of the above, use the entity name.
+
+Based on this, we can achieve our desired convention by simply excluding the second rule. So, if the name is set explicitly, use the provided name; otherwise, use the entity name. The `ModelBuilder` in EF Core exposes an `IMutableEntityType` collection, which describes all entities included in the model. Additionally, the `IMutableEntityType` conveniently exposes two methods: `GetTableName()` and `GetDefaultTableName()`. At first glance, one might think we can iterate through the entity types and, if these methods return different values, set the entity name. However, `GetDefaultTableName` returns the entity name or, if a DbSet is defined, its property name. The issue arises when the user sets an explicit table name that is equal to the DbSet property name. In that case, we'll mistakenly set the entity name and ignore the explicit configuration.
+
+Having said that, the final implementation is as follows:
+
+```csharp
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    // Call the method at the end, after all other configurations
+    modelBuilder.ConfigureTableNames(this);
+}
+```
+
+```csharp
+public static class ModelBuilderExtensions
+{
+    public static void ConfigureTableNames(this ModelBuilder modelBuilder, DbContext dbContext)
+    {
+        var dbSetNames = dbContext.GetType().GetProperties()
+            .Where(x => x.PropertyType.IsGenericType && typeof(DbSet<>).IsAssignableFrom(x.PropertyType.GetGenericTypeDefinition()))
+            .Select(x => x.Name)
+            .ToList();
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (!entityType.IsOwned())
+            {
+                var tableName = entityType.GetTableName();
+                var defaultTableName = entityType.GetDefaultTableName();
+
+                if (tableName is null || defaultTableName is null) continue;
+                if (tableName.Equals(defaultTableName)) continue;
+
+                if (dbSetNames.Find(x => x.Equals(tableName)) is not null)
+                {
+                    entityType.SetTableName(entityType.DisplayName());
+                }
+            }
+        }
+    }
+}
+```
+
+I hope you found this article useful. Happy coding!
+
