@@ -118,9 +118,10 @@ public class ExtendedMediator : Mediator
         Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish,
         CancellationToken cancellationToken)
     {
+        var serviceScopeFactory = _serviceScopeFactory;
         _ = Task.Run(async () =>
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var logger = scope.ServiceProvider.GetService<ILogger<ExtendedMediator>>();
             try
             {
@@ -131,7 +132,7 @@ public class ExtendedMediator : Mediator
             {
                 if (logger is not null)
                 {
-                    logger.LogError(ex, "Error occurred while executing the handler in ParallelNoWait mode");
+                    logger.LogError(ex, "Error occurred while executing the handler in NoWait mode");
                 }
             }
         }, cancellationToken);
