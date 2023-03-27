@@ -103,8 +103,8 @@ public class ExtendedMediator : Mediator
     {
         return strategy switch
         {
-            PublishStrategy.AsyncNoWait => PublishNoWait(notification, AsyncSequentialContinueOnException, cancellationToken),
-            PublishStrategy.ParallelNoWait => PublishNoWait(notification, ParallelWhenAll, cancellationToken),
+            PublishStrategy.AsyncNoWait => PublishNoWait(_serviceScopeFactory, notification, AsyncSequentialContinueOnException, cancellationToken),
+            PublishStrategy.ParallelNoWait => PublishNoWait(_serviceScopeFactory, notification, ParallelWhenAll, cancellationToken),
             PublishStrategy.AsyncSequentialContinueOnException => new ExtendedMediator(_serviceFactory, AsyncSequentialContinueOnException).Publish(notification, cancellationToken),
             PublishStrategy.AsyncSequentialStopOnException => new ExtendedMediator(_serviceFactory, AsyncSequentialStopOnException).Publish(notification, cancellationToken),
             PublishStrategy.AsyncWhenAll => new ExtendedMediator(_serviceFactory, AsyncWhenAll).Publish(notification, cancellationToken),
@@ -113,12 +113,12 @@ public class ExtendedMediator : Mediator
         };
     }
 
-    private Task PublishNoWait(
+    private static Task PublishNoWait(
+        IServiceScopeFactory serviceScopeFactory,
         INotification notification,
         Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish,
         CancellationToken cancellationToken)
     {
-        var serviceScopeFactory = _serviceScopeFactory;
         _ = Task.Run(async () =>
         {
             using var scope = serviceScopeFactory.CreateScope();
@@ -140,7 +140,7 @@ public class ExtendedMediator : Mediator
         return Task.CompletedTask;
     }
 
-    private Task ParallelWhenAll(
+    private static Task ParallelWhenAll(
         IEnumerable<Func<INotification, CancellationToken, Task>> handlers,
         INotification notification,
         CancellationToken cancellationToken)
@@ -155,7 +155,7 @@ public class ExtendedMediator : Mediator
         return Task.WhenAll(tasks);
     }
 
-    private async Task AsyncWhenAll(
+    private static async Task AsyncWhenAll(
         IEnumerable<Func<INotification, CancellationToken, Task>> handlers,
         INotification notification,
         CancellationToken cancellationToken)
@@ -194,7 +194,7 @@ public class ExtendedMediator : Mediator
         }
     }
 
-    private async Task AsyncSequentialContinueOnException(
+    private static async Task AsyncSequentialContinueOnException(
         IEnumerable<Func<INotification, CancellationToken, Task>> handlers,
         INotification notification,
         CancellationToken cancellationToken)
@@ -223,7 +223,7 @@ public class ExtendedMediator : Mediator
         }
     }
 
-    private async Task AsyncSequentialStopOnException(
+    private static async Task AsyncSequentialStopOnException(
         IEnumerable<Func<INotification, CancellationToken, Task>> handlers,
         INotification notification,
         CancellationToken cancellationToken)
