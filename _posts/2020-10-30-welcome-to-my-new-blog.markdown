@@ -7,7 +7,7 @@ description: My new blog based on GitHub Pages and Jekyll.
 categories: [Blogging, Tutorial]
 tags: [Productivity]
 image: /assets/img/pozitron-cover.png
-pin: true
+pin: false
 # math: true
 # toc: true
 ---
