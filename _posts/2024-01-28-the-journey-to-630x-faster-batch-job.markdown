@@ -130,7 +130,6 @@ By this point, it's clear that if we want any further optimizations, we should a
 ![Image3](/assets/img/posts/perfdemo/image-3.png)
 - We end up with the following code for building the suffix lookup for MasterParts. At first glance, this might seem counterintuitive. We didn't get rid of nested looping, it still exists, with itself. The difference is that the `[^length..]` operation is way simpler, it just slices the string.
 ```csharp
-[MethodImpl(MethodImplOptions.AggressiveInlining)]
 private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionary(MasterPart[] masterPartNumbers, bool useNoHyphen)
 {
     var suffixesByLength = new Dictionary<int, Dictionary<string, MasterPart>>(51);
