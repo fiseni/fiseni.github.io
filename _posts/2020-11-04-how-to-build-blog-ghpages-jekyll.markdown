@@ -6,10 +6,11 @@ date: 2020-11-04 12:00:00 +0100
 description: Tutorial on how to set up a blog with GitHub Pages and Jekyll.
 categories: [Blogging, Tutorial]
 tags: [Productivity]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 I recently decided to change my blogging platform. I simply want to focus on writing new content, and not deal with the peculiarities of different CMS tools. Ideally, I wanted the whole content to be stored in a git repository, and to be able to post articles in a form of markdown files. The design might not be anything fancy, but should be clean and easy to navigate for the users.
 

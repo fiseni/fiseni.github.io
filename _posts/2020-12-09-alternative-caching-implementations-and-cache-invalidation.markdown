@@ -6,10 +6,11 @@ date: 2020-12-09 17:00:00 +0100
 description: Alternative implementation for caching, and on-demand cache invalidation using EF (on changes only).
 categories: [Software Development]
 tags: [cache, dotnetcore, design patterns, software architecture]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 Today I'll be talking about caching and various ways to implement the same. We'll also show how to invalidate the cache on demand if using Entity Framework.
 

@@ -6,10 +6,11 @@ date: 2020-10-30 12:00:00 +0100
 description: My new blog based on GitHub Pages and Jekyll.
 categories: [Blogging, Tutorial]
 tags: [Productivity]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 This is my new blog, set up with GitHub Pages and Jekyll.
 

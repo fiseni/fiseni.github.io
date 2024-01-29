@@ -6,10 +6,11 @@ date: 2020-12-02 17:00:00 +0100
 description: How to improve your design and adhere to Open-Closed Principle by using dynamic/runtime DI configuration.
 categories: [Software Development]
 tags: [dependency injection, dotnetcore, design patterns, software architecture]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 I just recently published a Nuget package that offers some extensions to the .NET Core's built-in DI container, practically extensions to `IServiceCollection`. The extensions provide the ability for dynamic/runtime DI configuration, through external config files. You can find the repo [here](https://github.com/fiseni/PozitronDev.DIConfiguration).
 

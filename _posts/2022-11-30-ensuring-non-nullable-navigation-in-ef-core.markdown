@@ -6,10 +6,11 @@ date: 2022-11-30 12:00:00 +0100
 description: Discover how to tackle a common misconfiguration issue in Entity Framework Core involving owned types and nullable navigations. Learn how to ensure non-nullable navigation properties with practical examples and extension methods for better code reliability.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 In this article I will explore the possibility of a subtle bug you may face in your application, if you're using owned entity types and you have incorrect EF configuration. Let's start with an example directly. We have the following models and the corresponding EF configuration. To demonstrate the issue more clearly I disabled the NRT (nullable reference types) in my project. Later, we'll discuss how EF Core can automatically infer our model more accurately if we use NRT.
 

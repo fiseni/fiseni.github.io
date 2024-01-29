@@ -6,10 +6,11 @@ date: 2021-03-28 17:00:00 +0100
 description: How to disassociate your personal Microsoft account from a work/school (Azure AD) account!
 categories: [Blogging, Tutorial]
 tags: [microsoft account, azure, office365, outlook]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 I had a strange experience with my Microsoft account a couple of days ago. My personal Microsoft account got entangled with the newly created Azure AD (work/school) account, and I no longer could use some services (e.g. Outlook). Let me provide some background here and elaborate on it in more detail. I have purchased my domains on GoDaddy years ago, including the premium hosting package. I was managing the mail server by myself, the routing between the domain names (I had two), and all the rest of the details. Some time ago I got sick of all the management tasks, and I purchased a subscription to Office 365 Home provided by Microsoft. As part of the premium options, they offer the ability to associate a custom domain name to your "subscription", so all the members sharing the package can get an alias mail with the custom domain name. So, let's summarize, using example person "John Smith" and "smith.com" domain
 - I own the `smith.com` domain

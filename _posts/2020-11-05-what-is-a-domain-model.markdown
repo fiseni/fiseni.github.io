@@ -5,10 +5,11 @@ title: "What is a domain model?"
 date: 2020-11-05 12:00:00 +0100
 categories: [Blogging, Software Development]
 tags: [ddd, design patterns, software architecture]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-toc: false
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 I've been asked this question very often, especially by the new developers. So, let's try to explain the term and clear some misconceptions.
 The term is being popularized with the adoption of DDD (domain-driven design), but nowadays I think is broadly misunderstood. Usually, I get the following explanations:

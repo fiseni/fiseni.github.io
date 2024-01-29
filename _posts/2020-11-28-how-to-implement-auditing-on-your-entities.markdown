@@ -6,10 +6,11 @@ date: 2020-11-28 17:00:00 +0100
 description: A guide on how to implement auditing for your entities using Entity Framework.
 categories: [Software Development]
 tags: [EFCore, Auditing]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 Not rarely we require to apply some basic auditing information for our entities. Although we may configure full audit features on the Database side, sometimes it's handy to have this information as part of your entities.
 Of course, we want this feature to be processed behind the scenes, automatically, and not deal with it manually. If you're using Entity Framework (EF6, EFCore), implementation is quite straightforward.

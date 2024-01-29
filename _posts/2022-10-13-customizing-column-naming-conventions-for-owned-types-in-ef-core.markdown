@@ -6,10 +6,11 @@ date: 2022-10-13 12:00:00 +0100
 description: Learn how to customize column naming conventions for owned types in EF Core.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 EF Core allows you to model entity types that can only ever appear on navigation properties of other entity types. These are called owned entity types. By default, the owned entity types are mapped to the same table as the top-level parent. You can explicitly change this behavior in the configuration. Since the parent and owned types may contain properties with the same name, the generated column names for the owned types will contain the navigation name as a prefix by default. Let's see this in action.
 

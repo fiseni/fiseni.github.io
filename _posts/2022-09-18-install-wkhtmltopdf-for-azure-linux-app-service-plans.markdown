@@ -6,10 +6,11 @@ date: 2022-09-18 12:00:00 +0100
 description: Learn how to install the wkhtmltopdf package on Azure Linux App Service Plans during app startup, enabling HTML-to-PDF and HTML-to-image conversion features for your web applications running on Linux-based hosts.
 categories: [Blogging, Tutorial, Software Development]
 tags: [Azure]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 When working with web applications, you may occasionally need to convert HTML content into images or PDFs. In my case, I stumbled upon this requirement and, after a quick search, I discovered a fantastic open-source package called `wkhtmltopdf`. This powerful package provides an efficient solution for such conversions, offering two command-line tools: `wkhtmltopdf` for converting HTML to PDF, and `wkhtmltoimage` for converting HTML to various image formats. You can support the authors here: https://wkhtmltopdf.org/.
 

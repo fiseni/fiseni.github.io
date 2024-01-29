@@ -6,10 +6,11 @@ date: 2023-01-15 12:00:00 +0100
 description: Learn how to simplify the configuration of temporal tables in EF Core.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 When dealing with data that changes over time, you may want to keep track of historical changes. Temporal tables in SQL Server offer an excellent solution to this problem, allowing you to automatically track changes to your data. With temporal tables, you can see what your data looked like at any point in time, making it easier to debug issues and track changes over time. Starting with Entity Framework Core 6, the team added support for this feature. In this blog post, we will discuss how to create an extension method for EF Core that automatically configures temporal tables for all entities of interest.
 

@@ -6,10 +6,11 @@ date: 2022-12-17 12:00:00 +0100
 description: Explore advanced publishing strategies with the MediatR library in .NET applications. This article dives into the Mediator pattern, its benefits, and how to extend the MediatR library to support custom publishing strategies for handling notifications in various scenarios. Learn how to implement, register, and use these strategies with ease in your .NET projects.
 categories: [Blogging, Tutorial, Software Development]
 tags: [Mediator]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 <strong> EDIT: There are breaking changes in MediatR 12.0.1, and the following implementation won't work. I'll publish soon an updated implementation.</strong>
 

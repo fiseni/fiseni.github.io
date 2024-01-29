@@ -6,10 +6,11 @@ date: 2022-07-20 12:00:00 +0100
 description: Learn how to set up a custom global table naming convention in Entity Framework Core, allowing you to define default table names based on entity names and override them as needed.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 I was recently asked about configuring a default convention in EF Core so that the generated table names use the entity names. Additionally, if a table name is set explicitly for a given entity (through the ToTable() method in entity configuration), it should override the convention. Initially, I thought this would be quite easy to accomplish. However, it proved to be a bit trickier than I anticipated. The default convention for table names in EF Core (at the time of writing, version 6) is as follows:
 

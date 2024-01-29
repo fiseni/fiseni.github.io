@@ -6,10 +6,11 @@ date: 2021-05-17 17:00:00 +0100
 description: How to mark an item as default for a given entity's collection.
 categories: [Software Development]
 tags: [dotnetcore, design patterns, software architecture]
-img_path: '/assets/img/pozitron-cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/pozitron-cover.png
 ---
 In this post, I'll elaborate on the case when you need to mark an item as default for a given entity's collection. Let's assume we have `Customer` and `Address` entities, and each customer may have more than one address. For the sake of simplicity, we'll work with the following simple model.
 

@@ -6,10 +6,11 @@ date: 2024-01-28 12:00:00 +0100
 description: How we optimized a batch job to perform 630x faster.
 categories: [Software Development]
 tags: [dotnet]
-img_path: '/assets/img/posts/perfdemo/cover.png'
 pin: false
-# math: true
-# toc: true
+#math: false
+#toc: false
+image:
+  path: /assets/img/posts/perfdemo/cover.png
 ---
 *The code can be found in the following [GitHub repository](https://github.com/fiseni/PerfDemo)
 
