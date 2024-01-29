@@ -6,7 +6,7 @@ date: 2021-03-11 17:00:00 +0100
 description: What is the proper usage of domain events, and when not to use them!
 categories: [Software Development]
 tags: [ddd, design patterns, dotnetcore]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true

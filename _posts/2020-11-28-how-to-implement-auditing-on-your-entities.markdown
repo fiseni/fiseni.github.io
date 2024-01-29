@@ -6,7 +6,7 @@ date: 2020-11-28 17:00:00 +0100
 description: A guide on how to implement auditing for your entities using Entity Framework.
 categories: [Software Development]
 tags: [EFCore, Auditing]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true

@@ -6,7 +6,7 @@ date: 2021-03-10 17:00:00 +0100
 description: How to implement and persist immutable entities and value object in Entity Framework Core.
 categories: [Software Development]
 tags: [EFCore, dotnetcore]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true

@@ -5,7 +5,7 @@ title: "What is a domain model?"
 date: 2020-11-05 12:00:00 +0100
 categories: [Blogging, Software Development]
 tags: [ddd, design patterns, software architecture]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 toc: false

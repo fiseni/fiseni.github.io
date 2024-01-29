@@ -6,7 +6,7 @@ date: 2020-11-04 12:00:00 +0100
 description: Tutorial on how to set up a blog with GitHub Pages and Jekyll.
 categories: [Blogging, Tutorial]
 tags: [Productivity]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true

@@ -6,7 +6,7 @@ date: 2021-03-28 17:00:00 +0100
 description: How to disassociate your personal Microsoft account from a work/school (Azure AD) account!
 categories: [Blogging, Tutorial]
 tags: [microsoft account, azure, office365, outlook]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true

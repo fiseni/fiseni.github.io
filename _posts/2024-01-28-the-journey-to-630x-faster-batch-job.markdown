@@ -6,7 +6,7 @@ date: 2024-01-28 12:00:00 +0100
 description: How we optimized a batch job to perform 630x faster.
 categories: [Software Development]
 tags: [dotnet]
-image: /assets/img/posts/perfdemo/cover.png
+img_path: '/assets/img/posts/perfdemo/cover.png'
 pin: false
 # math: true
 # toc: true

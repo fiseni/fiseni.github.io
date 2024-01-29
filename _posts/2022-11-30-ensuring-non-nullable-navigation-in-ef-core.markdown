@@ -6,7 +6,7 @@ date: 2022-11-30 12:00:00 +0100
 description: Discover how to tackle a common misconfiguration issue in Entity Framework Core involving owned types and nullable navigations. Learn how to ensure non-nullable navigation properties with practical examples and extension methods for better code reliability.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true

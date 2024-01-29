@@ -6,7 +6,7 @@ date: 2020-12-09 17:00:00 +0100
 description: Alternative implementation for caching, and on-demand cache invalidation using EF (on changes only).
 categories: [Software Development]
 tags: [cache, dotnetcore, design patterns, software architecture]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true

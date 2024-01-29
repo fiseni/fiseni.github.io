@@ -6,7 +6,7 @@ date: 2023-01-15 12:00:00 +0100
 description: Learn how to simplify the configuration of temporal tables in EF Core.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]
-image: /assets/img/pozitron-cover.png
+img_path: '/assets/img/pozitron-cover.png'
 pin: false
 # math: true
 # toc: true
