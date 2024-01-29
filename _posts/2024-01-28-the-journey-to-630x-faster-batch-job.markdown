@@ -129,6 +129,7 @@ By this point, it's clear that if we want any further optimizations, we should a
 - Process and prepare the MasterParts collection in isolation, and build a suffix lookup table. We should end up with the following state `Dictionary<int, Dictionary<string, MasterPart>>`, where the key is the length of the string. The inner dictionary's keys will represent all possible MasterPart suffixes for that given length. Utilize some of the techniques used in the previous implementations like start index tables while building this suffix lookup. For clarity, this is what the lookup state will contain for an example dataset.
 ![Image3](/assets/img/posts/perfdemo/image-3.png)
 - We end up with the following code for building the suffix lookup for MasterParts. At first glance, this might seem counterintuitive. We didn't get rid of nested looping, it still exists, with itself. The difference is that the `[^length..]` operation is way simpler, it just slices the string.
+
 ```csharp
 private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionary(MasterPart[] masterPartNumbers, bool useNoHyphen)
 {
@@ -158,6 +159,7 @@ private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionar
 }
 ```
 - Now that we have this in place, we can build the final state as follows. It's worth noticing that the logic so far was just trying to add or retrieve records from a series of dictionaries.
+
 ```csharp
 private static Dictionary<string, MasterPart?> BuildDictionary(MasterPartsInfo masterPartsInfo, PartsInfo partsInfo)
 {
@@ -194,7 +196,6 @@ private static MasterPart? FindMatchForPartNumber(
     return null;
 }
 ```
-
 - The third rule in the requirements contains the opposite condition, and I excluded that logic from the above snippets for brevity. We need to build the same suffix lookup for Parts too. But, since the final output should be a MasterPart, this proved to be a bit more challenging. The suffix lookup for Parts will have the following form `Dictionary<int, Dictionary<string, List<string>>>` where the `List<string>` is a collection of the original Part.PartNumber for a given suffix.
 
 This implementation completed the task in under 4 seconds. That includes all the initial processing, building the state, and looping through Parts. Everything is part of the benchmarks. The code can be found [here](https://github.com/fiseni/PerfDemo/blob/main/PerfDemo/Services/Service4.cs).
