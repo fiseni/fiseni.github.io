@@ -158,7 +158,6 @@ private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionar
 }
 ```
 - Now that we have this in place, we can build the final state as follows. It's worth noticing that the logic so far was just trying to add or retrieve records from a series of dictionaries.
-
 ```csharp
 private static Dictionary<string, MasterPart?> BuildDictionary(MasterPartsInfo masterPartsInfo, PartsInfo partsInfo)
 {
