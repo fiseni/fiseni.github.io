@@ -12,8 +12,6 @@ pin: false
 image:
   path: /assets/img/posts/perfdemo/cover.png
 ---
-*The code can be found in the following [GitHub repository](https://github.com/fiseni/PerfDemo)
-
 Some time ago, a client needed some help optimizing a batch job for speed. The company provides analytics services for large global organizations in the automotive industry. They receive large amounts of data from the retailers/dealers and try to make sense of it. The integration is often rudimentary, where most retailers share data in the form of files (e.g. CSV or any other format). Batch jobs are used to process the files and prepare the data for further analysis. More often than not, the data is in bad shape, and batch jobs are not trivial at all. Some of the jobs, during the initial snapshotting, took more than a day to complete. This affected the onboarding processes and it was crucial to reduce the time to some acceptable level.
 
 We did manage to improve the process and overall turned out to be a success story. Anyhow, in this article, I want to focus only on a particular task, which I found interesting and worth sharing. The logic in hand took ~42 minutes to complete, and we reduced it to 3-4 seconds. That's more than 600x improvement in speed. The requirements were as follows.
@@ -45,7 +43,8 @@ MasterPart[] masterParts = File // Loaded from file or other sources. ~80K recor
 
 foreach (var part in parts)
 {
-    // Part contains more properties than just PartNumber and there is additional processing in this loop.
+    // Part contains more properties than just PartNumber 
+    // and there is additional processing in this loop.
     // But, that's not the focus of these benchmarks.
 
     var masterPart = FindMatchedPart(part.PartNumber);
@@ -131,7 +130,9 @@ By this point, it's clear that if we want any further optimizations, we should a
 - We end up with the following code for building the suffix lookup for MasterParts. At first glance, this might seem counterintuitive. We didn't get rid of nested looping, it still exists, with itself. The difference is that the `[^length..]` operation is way simpler, it just slices the string.
 
 ```csharp
-private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionary(MasterPart[] masterPartNumbers, bool useNoHyphen)
+private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionary(
+    MasterPart[] masterPartNumbers, 
+    bool useNoHyphen)
 {
     var suffixesByLength = new Dictionary<int, Dictionary<string, MasterPart>>(51);
     var startIndexByLength = GenerateStartIndexesByLengthDictionary(masterPartNumbers, useNoHyphen);
@@ -161,7 +162,9 @@ private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionar
 - Now that we have this in place, we can build the final state as follows. It's worth noticing that the logic so far was just trying to add or retrieve records from a series of dictionaries.
 
 ```csharp
-private static Dictionary<string, MasterPart?> BuildDictionary(MasterPartsInfo masterPartsInfo, PartsInfo partsInfo)
+private static Dictionary<string, MasterPart?> BuildDictionary(
+    MasterPartsInfo masterPartsInfo, 
+    PartsInfo partsInfo)
 {
     var masterPartsByPartNumber = new Dictionary<string, MasterPart?>();
 
@@ -177,17 +180,17 @@ private static Dictionary<string, MasterPart?> BuildDictionary(MasterPartsInfo m
         }
     }
 
-	// Apply logic for the third rule and try add to the masterPartsByPartNumber dictionary.
+    // Apply logic for the third rule and try add to the masterPartsByPartNumber dictionary.
 
     return masterPartsByPartNumber;
 }
 
-[MethodImpl(MethodImplOptions.AggressiveInlining)]
 private static MasterPart? FindMatchForPartNumber(
     ReadOnlySpan<char> partNumber,
     Dictionary<int, Dictionary<string, MasterPart>> suffixByLength)
 {
-    if (suffixByLength.TryGetValue(partNumber.Length, out var masterPartBySuffix) && masterPartBySuffix != null)
+    if (suffixByLength.TryGetValue(partNumber.Length, out var masterPartBySuffix) 
+        && masterPartBySuffix != null)
     {
         masterPartBySuffix.TryGetValue(partNumber.ToString(), out var match);
         return match;
