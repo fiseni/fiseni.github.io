@@ -158,6 +158,7 @@ private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionar
 }
 ```
 - Now that we have this in place, we can build the final state as follows. It's worth noticing that the logic so far was just trying to add or retrieve records from a series of dictionaries.
+
 ```csharp
 private static Dictionary<string, MasterPart?> BuildDictionary(MasterPartsInfo masterPartsInfo, PartsInfo partsInfo)
 {
@@ -194,6 +195,7 @@ private static MasterPart? FindMatchForPartNumber(
     return null;
 }
 ```
+
 - The third rule in the requirements contains the opposite condition, and I excluded that logic from the above snippets for brevity. We need to build the same suffix lookup for Parts too. But, since the final output should be a MasterPart, this proved to be a bit more challenging. The suffix lookup for Parts will have the following form `Dictionary<int, Dictionary<string, List<string>>>` where the `List<string>` is a collection of the original Part.PartNumber for a given suffix.
 
 This implementation completed the task in under 4 seconds. That includes all the initial processing, building the state, and looping through Parts. Everything is part of the benchmarks. The code can be found [here](https://github.com/fiseni/PerfDemo/blob/main/PerfDemo/Services/Service4.cs).
