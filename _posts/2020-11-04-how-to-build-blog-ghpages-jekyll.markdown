@@ -48,7 +48,6 @@ This is all you need in order to use your custom domain.
 There are a lot of jekyll templates that you can choose from. Here is a list of some theme galleries
 
 - [jamstackthemes.dev](https://jamstackthemes.dev/ssg/jekyll/)
-- [jekyllthemes.org](http://jekyllthemes.org/)
 - [jekyllthemes.io](https://jekyllthemes.io/)
 - [jekyll-themes.com](https://jekyll-themes.com/)
 
