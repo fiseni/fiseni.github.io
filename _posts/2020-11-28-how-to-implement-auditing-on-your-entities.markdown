@@ -117,7 +117,6 @@ public static class ChangeTrackerExtensions
         (entry.State == EntityState.Modified ||
         entry.References.Any(r => r.TargetEntry != null && 
                                     r.TargetEntry.Metadata.IsOwned() && 
-                                    r.TargetEntry.Metadata.ClrType.BaseType == typeof(ValueObject) &&
                                     (r.TargetEntry.State == EntityState.Added || r.TargetEntry.State == EntityState.Modified)));
 }
 ```
