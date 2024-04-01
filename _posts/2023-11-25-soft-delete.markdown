@@ -25,7 +25,7 @@ public interface ISoftDelete
 
 ## Applying soft delete
 
-EF Core is under active development and many new features have been added with each new version. I'll provide not only the final implementation but also its evolution over time. With each new version, I've been updating the soft-delete implementation to account for the new features and changes in EF Core.
+EF Core is under active development and many new features have been added with each new version. I'll provide not only the final implementation but also its evolution over time. With each new version, we had to update the soft-delete implementation to account for the new features and changes in EF Core.
 
 ### Option 1
 In the beginning, this was simple. We loop through all the deleted items in the tracker and update the state to `Modified`.
@@ -75,7 +75,7 @@ public override Task<int> SaveChangesAsync(CancellationToken cancellationToken =
 ```
 
 ### Option 3
-In Option2, we didn't have to account for OwnsMany since thos entities won't be mapped to the same table anyway. But, with the introduction of JSON arrays in EF Core 8, that is possible now. The `entry.References` don't include collections, and searching through `entry.Collections` or `entry.Navigations` is not straightforward either. So, we have to come up with an alternative approach. We'll fetch all owned entries in the tracker, and then check whether they're owned by a given deleted EntityEntry.
+In Option 2, we didn't have to account for OwnsMany since those entities won't be mapped to the same table anyway. But, with the introduction of JSON columns in EF Core, that is possible now. The `entry.References` don't include collections, and searching through `entry.Collections` or `entry.Navigations` is not straightforward either. So, we have to come up with an alternative approach. We'll fetch all owned entries in the tracker, and then check whether they're owned by a given deleted EntityEntry.
 
 ```csharp
 public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -95,7 +95,7 @@ public override Task<int> SaveChangesAsync(CancellationToken cancellationToken =
 
         foreach (var ownedEntry in ownedEntries)
         {
-            if (ownedEntry.Metadata.IsInOwnershipPath(entry.Metadata.ContainingEntityType))
+            if (ownedEntry.Metadata.IsInOwnershipPath(entry.Metadata))
             {
                 ownedEntry.State = EntityState.Modified;
             }
@@ -137,7 +137,8 @@ public static class EFCoreExtensions
             // In case we have inherited types, it's important to add it only for roots.
             var isRootType = entityType.GetRootType() == entityType;
 
-            if (isRootType && typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+            // Global query filters can not be assigned to owned entities, so we'll exclude them too.
+            if (isRootType && !entityType.IsOwned() && typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
             {
                 // The property is immutable (contains only a getter)
                 // By default will be ignored by EF, so we need to add it to the model explicitly.
