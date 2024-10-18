@@ -12,7 +12,9 @@ pin: false
 image:
   path: /assets/img/posts/777456/cover.png
 ---
-I published an article on how to utilize different publishing strategies for MediatR notifications. Please check it [here](https://fiseni.com/posts/publishing-strategies-in-MediatR/) for more context. However, the authors introduced breaking changes in the API and the internals, so the approaches described in that article won't work for versions 12 and onward.
+<strong> Update: I published a NuGet package that extends MediatR with these features. You can find it [here](https://github.com/fiseni/Pozitron.Extensions.MediatR).</strong>
+
+A few years ago I published an [article](https://fiseni.com/posts/publishing-strategies-in-MediatR/) on how to utilize different publishing strategies for MediatR notifications. However, the authors introduced breaking changes in the API and the internals since then, so the approaches described in that article won’t work for versions 12 and onward.
 
 Starting with version 12, we can provide a custom `INotificationPublisher` implementation during the registration.
 
@@ -82,7 +84,7 @@ public class SequentialAllPublisher : INotificationPublisher
         INotification notification,
         CancellationToken cancellationToken)
     {
-        var exceptions = new List<Exception>();
+        List<Exception>? exceptions = null;
 
         foreach (var handlerExecutor in handlerExecutors)
         {
@@ -92,15 +94,15 @@ public class SequentialAllPublisher : INotificationPublisher
             }
             catch (AggregateException ex)
             {
-                exceptions.AddRange(ex.Flatten().InnerExceptions);
+                (exceptions ??= []).AddRange(ex.Flatten().InnerExceptions);
             }
             catch (Exception ex) when (ex is not (OutOfMemoryException or StackOverflowException))
             {
-                exceptions.Add(ex);
+                (exceptions ??= []).Add(ex);
             }
         }
 
-        if (exceptions.Count != 0)
+        if (exceptions is not null && exceptions.Count != 0)
         {
             throw new AggregateException(exceptions);
         }
@@ -224,7 +226,7 @@ public class Foo(IPublisher publisher)
 }
 ```
 
-## NoWait strategies
+## Background Tasks
 There might be cases where you want to publish a notification and not wait for the handler's completion. Simply, you want them to run as background tasks. I'd avoid this approach and use these strategies sparingly, however, you might have a valid use case. To implement this feature, we might be compelled to just add a new publisher as follows.
 
 ```csharp
@@ -233,13 +235,13 @@ public enum PublishStrategy
     Default = 0,
     Sequential = 1,
     SequentialAll = 2,
-    SequentialNoWait = 3,
-    SequentialAllNoWait = 4,
+    SequentialBackground = 3,
+    SequentialAllBackground = 4,
 }
 ```
 
 ```csharp
-public class SequentialNoWaitPublisher : INotificationPublisher
+public class SequentialBackgroundPublisher : INotificationPublisher
 {
     public Task Publish(
         IEnumerable<NotificationHandlerExecutor> handlerExecutors,
@@ -278,12 +280,12 @@ internal class ExtendedMediator(
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IServiceProvider _serviceProvider = serviceProvider;
 
-    private static readonly Dictionary<PublishStrategy, (INotificationPublisher Publisher, bool NoWaitMode)> _publishers = new()
+    private static readonly Dictionary<PublishStrategy, (INotificationPublisher Publisher, bool IsBackgroundTask)> _publishers = new()
     {
         [PublishStrategy.Sequential] = (new SequentialPublisher(), false),
-        [PublishStrategy.SequentialNoWait] = (new SequentialPublisher(), true),
         [PublishStrategy.SequentialAll] = (new SequentialAllPublisher(), false),
-        [PublishStrategy.SequentialAllNoWait] = (new SequentialAllPublisher(), true),
+        [PublishStrategy.SequentialBackground] = (new SequentialPublisher(), true),
+        [PublishStrategy.SequentialAllBackground] = (new SequentialAllPublisher(), true),
     };
 
     public Task Publish<TNotification>(
@@ -292,14 +294,14 @@ internal class ExtendedMediator(
         CancellationToken cancellationToken = default)
         where TNotification : INotification
     {
-        if (_publishers.TryGetValue(strategy, out (INotificationPublisher Publisher, bool NoWaitMode) item))
+        if (_publishers.TryGetValue(strategy, out (INotificationPublisher Publisher, bool IsBackgroundTask) item))
         {
-            return item.NoWaitMode
-                ? PublishNoWait(_serviceScopeFactory, notification, item.Publisher, cancellationToken)
+            return item.IsBackgroundTask
+                ? PublishBackground(_serviceScopeFactory, notification, item.Publisher, cancellationToken)
                 : Publish(_serviceProvider, notification, item.Publisher, cancellationToken);
         }
 
-		// Fall back to the default behavior
+        // Fall back to the default behavior
         return Publish(notification, cancellationToken);
     }
 
@@ -310,7 +312,7 @@ internal class ExtendedMediator(
         CancellationToken cancellationToken) where TNotification : INotification
         => new Mediator(serviceProvider, publisher).Publish(notification, cancellationToken);
 
-    private static Task PublishNoWait<TNotification>(
+    private static Task PublishBackground<TNotification>(
         IServiceScopeFactory serviceScopeFactory,
         TNotification notification,
         INotificationPublisher publisher,
@@ -329,7 +331,7 @@ internal class ExtendedMediator(
             catch (Exception ex)
             {
                 // The aggregate exceptions are already flattened by the publishers.
-                logger?.LogError(ex, "Error occurred while executing the handler in NoWait mode!");
+                logger?.LogError(ex, "Error occurred while executing the handler(s) in a background thread!");
             }
 
         }, cancellationToken);
@@ -339,6 +341,6 @@ internal class ExtendedMediator(
 }
 ```
 
-This implementation also offers the ability to wrap any publisher in a background task. So, instead of having separate NoWait enum items, you may define an additional `runAsBackgroundTask` parameter for the `Publish` method. That's up to you to decide which API is more convenient for you.
+This implementation also offers the ability to wrap any publisher in a background task. So, instead of having separate Background enum items, you may define an additional `runAsBackgroundTask` parameter for the `Publish` method. That's up to you to decide which API is more convenient for you.
 
 I hope you found this article useful. Happy coding!
