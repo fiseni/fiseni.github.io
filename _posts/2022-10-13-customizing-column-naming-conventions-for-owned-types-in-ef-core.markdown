@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Customizing Column Naming Conventions for Owned Types in EF Core"
 date: 2022-10-13 12:00:00 +0100
+last_modified_at: 2022-10-13 12:00:00 +0100
 description: Learn how to customize column naming conventions for owned types in EF Core.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]

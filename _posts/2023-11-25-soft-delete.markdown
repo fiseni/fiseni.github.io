@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Global soft delete in EF Core!"
 date: 2023-11-25 12:00:00 +0100
+last_modified_at: 2023-11-25 12:00:00 +0100
 description: How to implement a global soft delete in EF Core.
 categories: [Software Development]
 tags: [dotnet efcore]

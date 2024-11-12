@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Alternative caching implementations and cache invalidation!"
 date: 2020-12-09 17:00:00 +0100
+last_modified_at: 2020-12-09 17:00:00 +0100
 description: Alternative implementation for caching, and on-demand cache invalidation using EF (on changes only).
 categories: [Software Development]
 tags: [cache, dotnetcore, design patterns, software architecture]

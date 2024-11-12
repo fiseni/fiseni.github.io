@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Open-Closed Principle and runtime DI configurations!"
 date: 2020-12-02 17:00:00 +0100
+last_modified_at: 2020-12-02 17:00:00 +0100
 description: How to improve your design and adhere to Open-Closed Principle by using dynamic/runtime DI configuration.
 categories: [Software Development]
 tags: [dependency injection, dotnetcore, design patterns, software architecture]

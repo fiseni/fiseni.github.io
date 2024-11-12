@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "What is the proper usage of domain events?"
 date: 2021-03-11 17:00:00 +0100
+last_modified_at: 2021-03-11 17:00:00 +0100
 description: What is the proper usage of domain events, and when not to use them!
 categories: [Software Development]
 tags: [ddd, design patterns, dotnetcore]

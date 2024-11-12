@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Publishing strategies in MediatR"
 date: 2022-12-17 12:00:00 +0100
+last_modified_at: 2022-12-17 12:00:00 +0100
 description: Explore advanced publishing strategies with the MediatR library in .NET applications. This article dives into the Mediator pattern, its benefits, and how to extend the MediatR library to support custom publishing strategies for handling notifications in various scenarios. Learn how to implement, register, and use these strategies with ease in your .NET projects.
 categories: [Blogging, Tutorial, Software Development]
 tags: [Mediator]

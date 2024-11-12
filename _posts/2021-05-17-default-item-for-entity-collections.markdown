@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Default item for a given entity's collection"
 date: 2021-05-17 17:00:00 +0100
+last_modified_at: 2021-05-17 17:00:00 +0100
 description: How to mark an item as default for a given entity's collection.
 categories: [Software Development]
 tags: [dotnetcore, design patterns, software architecture]

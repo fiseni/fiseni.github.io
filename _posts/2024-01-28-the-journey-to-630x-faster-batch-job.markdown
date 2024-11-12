@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "From Hours to Seconds: The Journey to a 630x Faster Batch Job"
 date: 2024-01-28 12:00:00 +0100
+last_modified_at: 2024-01-28 12:00:00 +0100
 description: How we optimized a batch job to perform 630x faster.
 categories: [Software Development]
 tags: [dotnet]

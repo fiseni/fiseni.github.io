@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Setting Global Table Naming Conventions in EF Core"
 date: 2022-07-20 12:00:00 +0100
+last_modified_at: 2022-07-20 12:00:00 +0100
 description: Learn how to set up a custom global table naming convention in Entity Framework Core, allowing you to define default table names based on entity names and override them as needed.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]

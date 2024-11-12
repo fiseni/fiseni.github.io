@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Simplifying Configuration for Temporal Tables in EF Core!"
 date: 2023-01-15 12:00:00 +0100
+last_modified_at: 2023-01-15 12:00:00 +0100
 description: Learn how to simplify the configuration of temporal tables in EF Core.
 categories: [Blogging, Tutorial, Software Development]
 tags: [EFCore]

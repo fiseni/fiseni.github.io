@@ -3,6 +3,7 @@
 # author: Fati Iseni
 title: "Asynchronous programming in ASP.NET web stack!"
 date: 2023-05-16 12:00:00 +0100
+last_modified_at: 2023-05-16 12:00:00 +0100
 description: How to apply TPM (async/await) in various components of ASP.NET
 categories: [Software Development]
 tags: [dotnet]
