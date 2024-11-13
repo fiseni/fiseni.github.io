@@ -5,8 +5,8 @@ title: "Owned Entity Types: Ensuring Non-Nullable Navigation in EF Core"
 date: 2022-11-30 12:00:00 +0100
 last_modified_at: 2022-11-30 12:00:00 +0100
 description: Discover how to tackle a common misconfiguration issue in Entity Framework Core involving owned types and nullable navigations. Learn how to ensure non-nullable navigation properties with practical examples and extension methods for better code reliability.
-categories: [Blogging, Tutorial, Software Development]
-tags: [EFCore]
+categories: [Tech, Software Development]
+tags: [EFCore, dotnet]
 pin: false
 #math: false
 #toc: false

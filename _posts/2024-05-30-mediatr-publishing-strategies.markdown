@@ -5,7 +5,7 @@ title: "Extending MediatR with publishing strategies"
 date: 2024-05-30 12:00:00 +0100
 last_modified_at: 2024-05-30 12:00:00 +0100
 description: Explore advanced publishing strategies with the MediatR library in .NET applications. This article describes how to extend the MediatR library to support custom strategies while publishing notifications. Learn how to implement, register, and use these strategies with ease in your .NET projects.
-categories: [Tutorial, Software Development]
+categories: [Tech, Software Development]
 tags: [Mediator]
 pin: false
 #math: false

@@ -4,8 +4,8 @@
 title: "What is a domain model?"
 date: 2020-11-05 12:00:00 +0100
 last_modified_at: 2020-11-05 12:00:00 +0100
-categories: [Blogging, Software Development]
-tags: [ddd, design patterns, software architecture]
+categories: [Tech, Software Development]
+tags: [DDD, Design Patterns, dotnet]
 pin: false
 #math: false
 #toc: false

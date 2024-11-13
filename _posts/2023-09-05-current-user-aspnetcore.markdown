@@ -5,8 +5,8 @@ title: "Current user implementation in ASP.NET Core!"
 date: 2023-09-05 12:00:00 +0100
 last_modified_at: 2023-09-05 12:00:00 +0100
 description: How to implement a current user provider in ASP.NET Core.
-categories: [Software Development]
-tags: [dotnet aspnetcore]
+categories: [Tech, Software Development]
+tags: [ASP.NET, dotnet]
 pin: false
 #math: false
 #toc: false

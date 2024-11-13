@@ -5,8 +5,8 @@ title: "How to implement auditing on your entities!"
 date: 2020-11-28 17:00:00 +0100
 last_modified_at: 2020-11-28 17:00:00 +0100
 description: A guide on how to implement auditing for your entities using Entity Framework.
-categories: [Software Development]
-tags: [EFCore, Auditing]
+categories: [Tech, Software Development]
+tags: [EFCore, Auditing, dotnet]
 pin: false
 #math: false
 #toc: false

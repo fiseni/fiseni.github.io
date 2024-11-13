@@ -5,7 +5,7 @@ title: "How to build a blog with GitHub Pages and Jekyll!"
 date: 2020-11-04 12:00:00 +0100
 last_modified_at: 2020-11-04 12:00:00 +0100
 description: Tutorial on how to set up a blog with GitHub Pages and Jekyll.
-categories: [Blogging, Tutorial]
+categories: [Tech, Miscellaneous]
 tags: [Productivity]
 pin: false
 #math: false
