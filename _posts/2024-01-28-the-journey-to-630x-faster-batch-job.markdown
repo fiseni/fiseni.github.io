@@ -3,7 +3,7 @@
 # author: Fati Iseni
 title: "From Hours to Seconds: The Journey to a 630x Faster Batch Job"
 date: 2024-01-28 12:00:00 +0100
-last_modified_at: 2024-01-28 12:00:00 +0100
+last_modified_at: 2025-01-18 12:00:00 +0100
 description: How we optimized a batch job to perform 630x faster.
 categories: [Tech, Software Development]
 tags: [dotnet]
@@ -13,6 +13,8 @@ pin: false
 image:
   path: /assets/img/posts/perfdemo/cover.png
 ---
+<strong>UPDATE:</strong> I gave this challenge another shot. I rewrote the implementations in C and made some further optimizations. It completed the execution in just 0.21 seconds, more than 10,000 faster than the original code. The C implementation can be found in the following [repository](https://github.com/fiseni/PerfDemoC). If you want to contribute and participate in the challenge, you can find all the necessary details in the repo.
+
 Some time ago, a client needed some help optimizing a batch job for speed. The company provides analytics services for large global organizations in the automotive industry. They receive large amounts of data from the retailers/dealers and try to make sense of it. The integration is often rudimentary, where most retailers share data in the form of files (e.g. CSV or any other format). Batch jobs are used to process the files and prepare the data for further analysis. More often than not, the data is in bad shape, and batch jobs are not trivial at all. Some of the jobs, during the initial snapshotting, took more than a day to complete. This affected the onboarding processes and it was crucial to reduce the time to some acceptable level.
 
 We did manage to improve the process and overall turned out to be a success story. Anyhow, in this article, I want to focus only on a particular task, which I found interesting and worth sharing. The logic in hand took ~42 minutes to complete, and we reduced it to 3-4 seconds. That's more than 600x improvement in speed. The requirements were as follows.
@@ -35,9 +37,9 @@ The original implementation is shown in the below snippet. I stripped out all th
 
 ```csharp
 
-Part[] parts = []; // Loaded from file or other sources. ~1.5 million records.
+Part[] parts = []; // Loaded from file or other sources. ~80K records.
 
-MasterPart[] masterParts = File // Loaded from file or other sources. ~80K records.
+MasterPart[] masterParts = File // Loaded from file or other sources. ~1.5 million.
     .ReadAllLines("master-parts.txt")
     .Select(x => new MasterPart(x))
     .ToArray();
@@ -87,7 +89,7 @@ public class MasterPart
 
 Considering all the requirements, I'd say the original author did a fair job. For each part, they looped through all MasterParts and tried to find a match. If no match is found, only then do they loop again based on the additional rules. They couldn't build dictionaries easily, since we're searching for suffixes and not exact matches. It's also worth mentioning that `EndsWith` is highly optimized in .NET. We can eventually argue that using LINQ might hurt the performance. It's easy to be judgemental, but frankly, in common scenarios and for smaller datasets this would be my first shot too. If nothing else, just to set the baseline for further improvements.
 
-However, once this needs to be scaled and applied to large datasets then the issue is evident. We have an O(m*n) operation. There are 80K Part records and 1.5M MasterPart records. So, in the worst possible scenario, we'll end up with 80K * 3 * 1.5M = 360 billion iterations. No wonder only this logic took almost an hour to complete.
+However, once this needs to be scaled and applied to large datasets then the issue is evident. We have an O(m*n) operation. There are 80K Part records and 1.5M MasterPart records. So, in the worst possible scenario, we'll end up with 80K * 3 * 1.5M = 360 billion iterations. No wonder only this logic took almost an hour to complete. To be clear, 360 billion iterations themselves are not the problem (that will happen within seconds), but the operation under those iterations. Comparing strings requires some non-trivial compute time and involves additional looping. So, we end up with with way higher number of iterations.
 
 In the following sections, we'll go through several optimization attempts. We should have the following considerations.
 - We can't get rid of the first loop since there is additional processing for each Part. So, that should remain intact.
@@ -97,7 +99,6 @@ In the following sections, we'll go through several optimization attempts. We sh
 
 In this first attempt we won't utilize any drastically different algorithm. Let's just explore how far we can push with the existing approach.
 - Prepare the MasterPart dataset. Let's create two additional arrays of it, one sorted by PartNumber and another one sorted by PartNumberNoHyphens.
-- Remove duplicates and records with less than 3 characters.
 - Now that we have a sorted collection, we don't have to start looping from the first item. Perhaps we need a `Dictionary<int, int>` where the key is the length of the string, and the value is the starting position in the MasterPart collection. So, for each Part, we can retrieve the starting position to loop through MasterParts. There might be cases where a given length doesn't exist in MasterParts, therefore, we have to fill these empty values in the dictionary with the next available length (since we're searching for a suffix). All this state should be prepared before we start with the outer loop. As an example, this is what the dictionary will contain.
 ![Image2](/assets/img/posts/perfdemo/image-2.png)
 - The third rule we have has the opposite logic. We're searching whether MasterPart.PartNumber is a suffix to Part.PartNumber. So we should fill the dictionaries accordingly and have to loop backwards.
@@ -124,11 +125,11 @@ This decreased the time to 4 minutes, 2x improvement. We should be a bit careful
 
 ## Implementation 4
 
-By this point, it's clear that if we want any further optimizations, we should adopt a brand-new approach. The real issue is that we have an O(n*m) operation (for the worst case), and we end up with 360 billion iterations. To make it clear, the iterations themselves are not the problem (that will happen within a second), but the operation under those iterations. The string comparison, in our case `ReadOnlySpan<char>.SequenceEqual`, requires some non-trivial compute time. Ideally, we should come up with an algorithm that doesn't require string comparison at all. We need some sort of suffix lookup table.
+By this point, it's clear that if we want any further optimizations, we should adopt a brand-new approach. The real issue is that we have an O(n*m) operation (for the worst case), and we end up with 360 billion iterations. The string comparison for each iteration, in our case `ReadOnlySpan<char>.SequenceEqual`, requires some non-trivial compute time. Ideally, we should come up with an algorithm that doesn't require string comparisons or at least minimize it. We need some sort of suffix lookup table.
 - Create a final lookup state in the form of `Dictionary<string, MasterPart?>`, where the key is the Part.PartNumber. The original loop should contain a simple lookup check.
 - Process and prepare the MasterParts collection in isolation, and build a suffix lookup table. We should end up with the following state `Dictionary<int, Dictionary<string, MasterPart>>`, where the key is the length of the string. The inner dictionary's keys will represent all possible MasterPart suffixes for that given length. Utilize some of the techniques used in the previous implementations like start index tables while building this suffix lookup. For clarity, this is what the lookup state will contain for an example dataset.
 ![Image3](/assets/img/posts/perfdemo/image-3.png)
-- We end up with the following code for building the suffix lookup for MasterParts. At first glance, this might seem counterintuitive. We didn't get rid of nested looping, it still exists, with itself. The difference is that the `[^length..]` operation is way simpler, it just slices the string.
+- We end up with the following code for building the suffix lookup for MasterParts. Anyone that have implemented hash tables knows that computing the hash key is not trivial either. Also, in the case of key collisions, we still need string comparisons. At first glance, this might seem counterintuitive. But, if we look closely, we have less than 50 * 1.5M iterations here, orders of magnitude less.
 
 ```csharp
 private static Dictionary<int, Dictionary<string, MasterPart>> GenerateDictionary(
