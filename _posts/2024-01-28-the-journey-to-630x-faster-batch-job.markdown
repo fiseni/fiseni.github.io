@@ -15,6 +15,7 @@ image:
 ---
 <strong>UPDATE:</strong> I gave this challenge another shot. I rewrote the implementations in C and made some further optimizations. It completed the execution in just 0.21 seconds, more than 10,000 faster than the original code. The C implementation can be found in the following [repository](https://github.com/fiseni/PerfDemoC). If you want to contribute and participate in the challenge, you can find all the necessary details in the repo.
 
+---
 Some time ago, a client needed some help optimizing a batch job for speed. The company provides analytics services for large global organizations in the automotive industry. They receive large amounts of data from the retailers/dealers and try to make sense of it. The integration is often rudimentary, where most retailers share data in the form of files (e.g. CSV or any other format). Batch jobs are used to process the files and prepare the data for further analysis. More often than not, the data is in bad shape, and batch jobs are not trivial at all. Some of the jobs, during the initial snapshotting, took more than a day to complete. This affected the onboarding processes and it was crucial to reduce the time to some acceptable level.
 
 We did manage to improve the process and overall turned out to be a success story. Anyhow, in this article, I want to focus only on a particular task, which I found interesting and worth sharing. The logic in hand took ~42 minutes to complete, and we reduced it to 3-4 seconds. That's more than 600x improvement in speed. The requirements were as follows.
