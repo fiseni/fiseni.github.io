@@ -3,7 +3,7 @@
 # author: Fati Iseni
 title: "From Hours to Seconds: The Journey to a 630x Faster Batch Job"
 date: 2024-01-28 12:00:00 +0100
-last_modified_at: 2025-01-18 12:00:00 +0100
+last_modified_at: 2025-01-20 12:00:00 +0100
 description: How we optimized a batch job to perform 630x faster.
 categories: [Tech, Software Development]
 tags: [dotnet]
@@ -13,7 +13,8 @@ pin: false
 image:
   path: /assets/img/posts/perfdemo/cover.png
 ---
-<strong>UPDATE:</strong> I gave this challenge another shot. I rewrote the implementations in C and made some further optimizations. It completed the execution in just 0.21 seconds, more than 10,000 faster than the original code. The C implementation can be found in the following [repository](https://github.com/fiseni/PerfDemoC). If you want to contribute and participate in the challenge, you can find all the necessary details in the repo.
+<strong>UPDATE:</strong> I gave this challenge another shot. I made minor improvements to the existing implementations and added a new implementation `Processor5`, that completed the execution in less than 1 second (down from 42 minutes). For more details, refer to the [repository](https://github.com/fiseni/PerfDemo).
+I also rewrote the implementations in C out of curiosity. It executes in just ~0.2 seconds, more than 10,000 faster than the original code. The C implementation can be found in the following [repository](https://github.com/fiseni/PerfDemoC). If you'd like to contribute and participate in the challenge, you can find all the necessary details in this repo.
 
 ---
 Some time ago, a client needed some help optimizing a batch job for speed. The company provides analytics services for large global organizations in the automotive industry. They receive large amounts of data from the retailers/dealers and try to make sense of it. The integration is often rudimentary, where most retailers share data in the form of files (e.g. CSV or any other format). Batch jobs are used to process the files and prepare the data for further analysis. More often than not, the data is in bad shape, and batch jobs are not trivial at all. Some of the jobs, during the initial snapshotting, took more than a day to complete. This affected the onboarding processes and it was crucial to reduce the time to some acceptable level.
