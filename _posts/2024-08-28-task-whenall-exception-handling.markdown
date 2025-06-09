@@ -11,7 +11,7 @@ pin: false
 #math: false
 #toc: false
 image:
-  path: /assets/img/posts/321587/cover1.png
+  path: /assets/img/posts/321587/cover.png
 ---
 
 The `Task.WhenAll` in .NET is a powerful construct for coordinating multiple asynchronous I/O operations. It represents a mechanism to mediate concurrent actions. Contrary to popular belief, it doesn't create threads on your behalf. It doesn't create concurrency, it just helps you manage it effectively.
