@@ -28,6 +28,8 @@ That’s when GitHub Pages came to the rescue. GitHub Pages is a free static sit
 
 ## GitHub Actions Workflow
 
+You can check the original [content here](https://github.com/fiseni/QuerySpecification/blob/main/.github/workflows/build.yml).
+
 ```yaml
 name: Full Build
 
@@ -60,12 +62,12 @@ jobs:
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.9
       with:
         reports: tests/**/coverage.cobertura.xml
-        targetdir: ${{ runner.temp }}/coveragereport
+        targetdir: {% raw %}${{ runner.temp }}{% endraw %}/coveragereport
         reporttypes: 'Html;Badges;MarkdownSummaryGithub'
         assemblyfilters: -*Tests*
 
     - name: Publish coverage report in build summary
-      run: cat '${{ runner.temp }}'/coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+      run: cat '{% raw %}${{ runner.temp }}{% endraw %}'/coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
       shell: bash
 
     - name: Create coverage-reports branch and push content
@@ -74,7 +76,7 @@ jobs:
         git checkout coverage-reports || git checkout --orphan coverage-reports
         git reset --hard
         git clean -fd
-        cp -rp '${{ runner.temp }}'/coveragereport/* ./
+        cp -rp '{% raw %}${{ runner.temp }}{% endraw %}'/coveragereport/* ./
         echo "YOUR_CUSTOM_DOMAIN" > CNAME
         git config user.name github-actions
         git config user.email github-actions@github.com
