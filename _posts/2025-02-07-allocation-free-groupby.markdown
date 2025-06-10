@@ -20,6 +20,8 @@ In this article, we'll explore alternatives to LINQ's `GroupBy` that avoid these
 
 To better isolate the issue, we'll use a simple example. While it may not reflect real-world complexity (and micro-benchmarking always comes with caveats); it serves well for measuring memory usage and allocations, helping us understand the implications of different approaches.
 
+> **_NOTE:_**  LINQ’s `OrderBy` is implemented as an extension to `IEnumerable<T>`, allowing it to operate on both concrete collections and lazily evaluated data streams. In this article, we focus on the special case where the `IEnumerable` source is a concrete collection, which enables allocation-free optimizations not possible with general lazy streams.
+
 ## Option 1: LINQ GroupBy
 
 This example serves as our baseline. The calculation is minimal, and we use only `GroupBy` from LINQ to isolate its effects. The input is a `List`, which we pass as-is to avoid introducing extra allocations that could skew results.
